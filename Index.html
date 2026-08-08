@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Event Ticketing App</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+}
+
+.container{
+    max-width:500px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#222;
+}
+
+h2{
+    text-align:center;
+    color:#444;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input,
+select{
+    width:100%;
+    padding:13px;
+    margin-top:7px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:20px;
+    border:none;
+    border-radius:8px;
+    background:#198754;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+}
+
+button:disabled{
+    background:#777;
+}
+
+#message{
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+/* TICKET */
+
+#ticket{
+    display:none;
+    margin-top:25px;
+    padding:22px;
+    border:2px dashed #198754;
+    border-radius:12px;
+    background:#f8fff9;
+}
+
+#ticket h3{
+    text-align:center;
+    color:#198754;
+    font-size:23px;
+}
+
+.ticket-info{
+    margin:11px 0;
+}
+
+.ticket-number{
+    text-align:center;
+    background:#198754;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    margin:15px 0;
+    font-size:18px;
+    font-weight:bold;
+}
+
+#qrcode{
+    text-align:center;
+    margin-top:20px;
+}
+
+#qrcode img{
+    margin:auto;
+}
+
+/* PRINT BUTTON */
+
+#printTicket{
+    background:#007bff;
+}
+
+/* DOWNLOAD BUTTON */
+
+#downloadTicket{
+    background:#6f42c1;
+}
+
+/* DASHBOARD LINK */
+
+.dashboard-link{
+    display:block;
+    text-align:center;
+    margin-top:25px;
+    padding:13px;
+    background:#212529;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* PRINT */
+
+@media print{
+
+    body{
+        background:white;
+        padding:0;
+    }
+
+    .container{
+        box-shadow:none;
+        max-width:100%;
+    }
+
+    form,
+    #message,
+    .dashboard-link,
+    #printTicket,
+    #downloadTicket,
+    h1,
+    h2{
+        display:none !important;
+    }
+
+    #ticket{
+        display:block !important;
+        border:2px dashed #000;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+<h1>🎫 Event Ticketing App</h1>
+
+<h2>Book Your Event</h2>
+
+
+<form id="bookingForm">
+
+
+<label for="name">
+Full Name
+</label>
+
+<input
+    type="text"
+    id="name"
+    placeholder="Enter your full name"
+    required
+>
+
+
+<label for="email">
+Email
+</label>
+
+<input
+    type="email"
+    id="email"
+    placeholder="Enter your email"
+    required
+>
+
+
+<label for="phone">
+Phone Number
+</label>
+
+<input
+    type="tel"
+    id="phone"
+    placeholder="Enter your phone number"
+    required
+>
+
+
+<label for="event">
+Select Event
+</label>
+
+<select id="event" required>
+
+<option value="">
+-- Select Event --
+</option>
+
+<option value="Qur'an Recitation">
+Qur'an Recitation
+</option>
+
+<option value="Islamic Lecture">
+Islamic Lecture
+</option>
+
+<option value="Qur'an Memorization">
+Qur'an Memorization
+</option>
+
+<option value="Naat Competition">
+Naat Competition
+</option>
+
+<option value="Islamic Conference">
+Islamic Conference
+</option>
+
+<option value="Youth Program">
+Youth Program
+</option>
+
+<option value="Sport">
+Sport
+</option>
+
+<option value="Birthday Party">
+Birthday Party
+</option>
+
+<option value="Wedding">
+Wedding
+</option>
+
+<option value="Conference">
+Conference
+</option>
+
+<option value="Seminar">
+Seminar
+</option>
+
+<option value="Workshop">
+Workshop
+</option>
+
+<option value="Concert">
+Concert
+</option>
+
+<option value="Graduation">
+Graduation
+</option>
+
+<option value="Naming Ceremony">
+Naming Ceremony
+</option>
+
+<option value="Family Gathering">
+Family Gathering
+</option>
+
+<option value="School Event">
+School Event
+</option>
+
+<option value="Business Event">
+Business Event
+</option>
+
+<option value="Cultural Event">
+Cultural Event
+</option>
+
+<option value="Community Event">
+Community Event
+</option>
+
+<option value="Other">
+Other
+</option>
+
+</select>
+
+
+<button
+    id="bookButton"
+    type="submit"
+>
+🎟️ Book Now
+</button>
+
+</form>
+
+
+<div id="message"></div>
+
+
+<!-- PROFESSIONAL TICKET -->
+
+<div id="ticket">
+
+<h3>
+🎟️ BOOKING TICKET
+</h3>
+
+
+<div class="ticket-number">
+
+Ticket Number:
+
+<span id="ticketNumber"></span>
+
+</div>
+
+
+<div class="ticket-info">
+
+<strong>Name:</strong>
+
+<span id="ticketName"></span>
+
+</div>
+
+
+<div class="ticket-info">
+
+<strong>Email:</strong>
+
+<span id="ticketEmail"></span>
+
+</div>
+
+
+<div class="ticket-info">
+
+<strong>Phone:</strong>
+
+<span id="ticketPhone"></span>
+
+</div>
+
+
+<div class="ticket-info">
+
+<strong>Event:</strong>
+
+<span id="ticketEvent"></span>
+
+</div>
+
+
+<div class="ticket-info">
+
+<strong>Date:</strong>
+
+<span id="ticketDate"></span>
+
+</div>
+
+
+<div id="qrcode"></div>
+
+
+<button
+    id="printTicket"
+    type="button"
+>
+🖨️ Print Ticket
+</button>
+
+
+<button
+    id="downloadTicket"
+    type="button"
+>
+📥 Save Ticket
+</button>
+
+
+</div>
+
+
+<a
+    class="dashboard-link"
+    href="dashboard.html"
+>
+📊 Open Admin Dashboard
+</a>
+
+
+</div>
+
+
+<!-- QR CODE LIBRARY -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+<!-- BOOKING SCRIPT -->
+
+<script type="module" src="script.js"></script>
+
+
+<script>
+
+/* PRINT */
+
+document
+.getElementById("printTicket")
+.addEventListener(
+    "click",
+    function(){
+
+        window.print();
+
+    }
+);
+
+
+/* SAVE TICKET */
+
+document
+.getElementById("downloadTicket")
+.addEventListener(
+    "click",
+    function(){
+
+        const ticket =
+            document.getElementById("ticket");
+
+
+        const printWindow =
+            window.open(
+                "",
+                "_blank"
+            );
+
+
+        printWindow.document.write(`
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Event Ticket</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    padding:20px;
+}
+
+.ticket{
+    max-width:450px;
+    margin:auto;
+    padding:25px;
+    border:2px dashed #198754;
+    border-radius:12px;
+}
+
+h2{
+    text-align:center;
+    color:#198754;
+}
+
+.number{
+    text-align:center;
+    padding:12px;
+    background:#198754;
+    color:white;
+    font-weight:bold;
+    border-radius:8px;
+    margin:15px 0;
+}
+
+.info{
+    margin:12px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="ticket">
+
+<h2>
+🎟️ EVENT TICKET
+</h2>
+
+<div class="number">
+
+Ticket Number:
+
+${document.getElementById("ticketNumber").textContent}
+
+</div>
+
+<div class="info">
+
+<strong>Name:</strong>
+
+${document.getElementById("ticketName").textContent}
+
+</div>
+
+<div class="info">
+
+<strong>Email:</strong>
+
+${document.getElementById("ticketEmail").textContent}
+
+</div>
+
+<div class="info">
+
+<strong>Phone:</strong>
+
+${document.getElementById("ticketPhone").textContent}
+
+</div>
+
+<div class="info">
+
+<strong>Event:</strong>
+
+${document.getElementById("ticketEvent").textContent}
+
+</div>
+
+<div class="info">
+
+<strong>Date:</strong>
+
+${document.getElementById("ticketDate").textContent}
+
+</div>
+
+<p style="text-align:center;margin-top:25px">
+
+Please present this ticket at the event.
+
+</p>
+
+</div>
+
+<script>
+
+window.onload=function(){
+
+    window.print();
+
+};
+
+<\/script>
+
+</body>
+
+</html>
+
+`);
+
+
+        printWindow.document.close();
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
