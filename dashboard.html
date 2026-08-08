@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Event Ticketing Admin Dashboard</title><style>
 
-<title>Event Ticketing Admin Dashboard</title>
-
-<style>
 *{
   box-sizing:border-box;
 }
@@ -111,6 +106,50 @@ button:hover{
   font-weight:bold;
 }
 
+/* EVENT STATISTICS */
+
+.event-card{
+  background:#fafafa;
+  border:1px solid #ddd;
+  padding:15px;
+  margin:12px 0;
+  border-radius:9px;
+}
+
+.event-title{
+  font-size:20px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.event-row{
+  display:flex;
+  justify-content:space-between;
+  margin:8px 0;
+}
+
+.event-names{
+  margin-top:15px;
+  padding-top:12px;
+  border-top:1px solid #ddd;
+}
+
+.event-names-title{
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.event-names ul{
+  margin:5px 0;
+  padding-left:25px;
+}
+
+.event-names li{
+  margin:6px 0;
+}
+
+/* BOOKINGS */
+
 .booking{
   background:#fafafa;
   border:1px solid #ddd;
@@ -145,6 +184,11 @@ button:hover{
   margin-top:0;
 }
 
+.loading{
+  text-align:center;
+  padding:15px;
+}
+
 @media(max-width:600px){
 
   .stats{
@@ -156,20 +200,8 @@ button:hover{
   }
 
 }
-</style>
-</head>
 
-<body>
-
-<div class="container">
-
-<!-- LOGIN -->
-
-<div id="loginBox" class="card">
-
-<h1>🔐 Admin Login</h1>
-
-<input
+</style></head><body><div class="container"><!-- LOGIN --><div id="loginBox" class="card"><h1>🔐 Admin Login</h1><input
 type="text"
 id="username"
 placeholder="Username">
@@ -179,53 +211,20 @@ type="password"
 id="password"
 placeholder="Password">
 
-<button onclick="login()">
+<button type="button" onclick="login()">
 Login
-</button>
-
-<p id="loginMessage"></p>
-
-</div>
-
-
-<!-- DASHBOARD -->
-
-<div id="dashboard">
-
-<h1>🎟️ Event Admin Dashboard</h1>
-
-
-<!-- STATISTICS -->
-
-<div class="stats">
-
-<div class="stat">
+</button><p id="loginMessage"></p></div><!-- DASHBOARD --><div id="dashboard"><h1>🎟️ Event Admin Dashboard</h1><!-- STATISTICS --><div class="stats"><div class="stat">
 <h2 id="totalBookings">0</h2>
 <p>📊 Total Bookings</p>
-</div>
-
-<div class="stat">
+</div><div class="stat">
 <h2 id="checkedInCount">0</h2>
 <p>✅ Checked In</p>
-</div>
-
-<div class="stat">
+</div><div class="stat">
 <h2 id="notCheckedCount">0</h2>
 <p>⏳ Not Checked In</p>
-</div>
-
-</div>
-
-
-<!-- CHECK IN -->
-
-<div class="card">
-
-<h2>🎫 Ticket Check-in</h2>
-
-<p>Enter Ticket Number:</p>
-
-<input
+</div></div><!-- EVENT STATISTICS --><div class="card"><h2>🎪 Event Statistics</h2><div id="eventStats"><div class="loading">
+Loading event statistics...
+</div></div></div><!-- CHECK IN --><div class="card"><h2>🎫 Ticket Check-in</h2><p>Enter Ticket Number:</p><input
 type="text"
 id="ticketNumber"
 placeholder="Enter Ticket Number">
@@ -234,81 +233,35 @@ placeholder="Enter Ticket Number">
 class="green"
 onclick="checkInTicket()">
 
-Check In
+✅ Check In
 
-</button>
-
-<div id="checkinResult"></div>
-
-<p id="checkinMessage"></p>
-
-</div>
-
-
-<!-- SEARCH -->
-
-<div class="card">
-
-<h2>🔍 Search Bookings</h2>
-
-<input
+</button><div id="checkinResult"></div><p id="checkinMessage"></p></div><!-- SEARCH --><div class="card"><h2>🔍 Search Bookings</h2><input
 type="text"
 id="searchInput"
-placeholder="Search by name, email or ticket number"
+placeholder="Search by name, email, event or ticket number"
 oninput="searchBookings()">
 
-<div class="actions">
-
-<button
+<div class="actions"><button
 class="dark"
 onclick="loadBookings()">
 
 🔄 Refresh
 
-</button>
-
-<button
+</button><button
 class="green"
 onclick="exportCSV()">
 
 📥 Export CSV
 
-</button>
+</button></div></div><!-- BOOKINGS --><div class="card"><h2>📋 All Bookings</h2><div id="bookings">Loading bookings...
 
-</div>
-
-</div>
-
-
-<!-- BOOKINGS -->
-
-<div class="card">
-
-<h2>📋 All Bookings</h2>
-
-<div id="bookings">
-Loading bookings...
-</div>
-
-</div>
-
-
-<!-- LOGOUT -->
-
-<button
+</div></div><!-- LOGOUT --><button
 class="red"
 onclick="logout()">
 
 🚪 Logout
 
-</button>
-
-</div>
-
-</div>
-
-
-<script type="module">
+</button></div></div><script type="module">
 
 /* FIREBASE */
 
@@ -374,19 +327,13 @@ let allBookings = [];
 window.login = function(){
 
 const username =
-document.getElementById(
-"username"
-).value.trim();
+document.getElementById("username").value.trim();
 
 const password =
-document.getElementById(
-"password"
-).value.trim();
+document.getElementById("password").value.trim();
 
 const message =
-document.getElementById(
-"loginMessage"
-);
+document.getElementById("loginMessage");
 
 
 if(
@@ -402,6 +349,8 @@ document.getElementById(
 "dashboard"
 ).style.display="block";
 
+message.textContent="";
+
 loadBookings();
 
 }else{
@@ -409,7 +358,7 @@ loadBookings();
 message.style.color="red";
 
 message.textContent=
-"Incorrect username or password.";
+"❌ Incorrect username or password.";
 
 }
 
@@ -441,13 +390,10 @@ document.getElementById(
 
 /* LOAD BOOKINGS */
 
-window.loadBookings =
-async function(){
+window.loadBookings = async function(){
 
 const bookingsDiv =
-document.getElementById(
-"bookings"
-);
+document.getElementById("bookings");
 
 bookingsDiv.innerHTML=
 "Loading bookings...";
@@ -480,6 +426,8 @@ id:bookingDoc.id,
 
 updateStatistics();
 
+updateEventStatistics();
+
 displayBookings(
 allBookings
 );
@@ -497,7 +445,7 @@ bookingsDiv.innerHTML=
 };
 
 
-/* STATISTICS */
+/* GENERAL STATISTICS */
 
 function updateStatistics(){
 
@@ -532,16 +480,209 @@ document.getElementById(
 }
 
 
-/* DISPLAY BOOKINGS */
+/* EVENT STATISTICS */
 
-function displayBookings(
-bookings
+function updateEventStatistics(){
+
+const eventStats =
+document.getElementById("eventStats");
+
+const events = {};
+
+
+allBookings.forEach(
+(data)=>{
+
+const eventName =
+data.event || "Other";
+
+
+if(!events[eventName]){
+
+events[eventName] = {
+
+total:0,
+
+checked:0,
+
+notChecked:0,
+
+names:[]
+
+};
+
+}
+
+
+events[eventName].total++;
+
+
+if(data.checkedIn === true){
+
+events[eventName].checked++;
+
+}else{
+
+events[eventName].notChecked++;
+
+}
+
+
+if(
+data.name &&
+String(data.name).trim() !== ""
 ){
 
-const bookingsDiv =
-document.getElementById(
-"bookings"
+events[eventName].names.push(
+data.name
 );
+
+}
+
+});
+
+
+const eventNames =
+Object.keys(events);
+
+
+if(eventNames.length === 0){
+
+eventStats.innerHTML=
+"<p>No event bookings yet.</p>";
+
+return;
+
+}
+
+
+eventNames.sort();
+
+
+eventStats.innerHTML="";
+
+
+eventNames.forEach(
+(eventName)=>{
+
+const event =
+events[eventName];
+
+
+const card =
+document.createElement("div");
+
+
+card.className="event-card";
+
+
+let namesHTML="";
+
+
+if(event.names.length > 0){
+
+namesHTML =
+event.names.map(
+(name)=>{
+
+return `
+<li>
+${escapeHTML(name)}
+</li>
+`;
+
+}
+).join("");
+
+}else{
+
+namesHTML=
+"<li>No names available</li>";
+
+}
+
+
+card.innerHTML=`
+
+<div class="event-title">
+
+🎪 ${escapeHTML(eventName)}
+
+</div>
+
+
+<div class="event-row">
+
+<span>
+🎟️ Total People
+</span>
+
+<strong>
+${event.total}
+</strong>
+
+</div>
+
+
+<div class="event-row">
+
+<span>
+✅ Checked In
+</span>
+
+<strong>
+${event.checked}
+</strong>
+
+</div>
+
+
+<div class="event-row">
+
+<span>
+⏳ Not Checked In
+</span>
+
+<strong>
+${event.notChecked}
+</strong>
+
+</div>
+
+
+<div class="event-names">
+
+<div class="event-names-title">
+
+👥 People who booked this event:
+
+</div>
+
+<ul>
+
+${namesHTML}
+
+</ul>
+
+</div>
+
+`;
+
+
+eventStats.appendChild(card);
+
+});
+
+}
+
+
+/* DISPLAY BOOKINGS */
+
+function displayBookings(bookings){
+
+const bookingsDiv =
+document.getElementById("bookings");
+
 
 bookingsDiv.innerHTML="";
 
@@ -559,7 +700,16 @@ return;
 bookings.forEach(
 (data)=>{
 
+
+/*
+IMPORTANT:
+Booking system ɗinka yana amfani da ticketID.
+Mun kuma bar ticketNumber/ticket/id
+domin Check-in ya yi aiki.
+*/
+
 const ticketNumber =
+data.ticketID ||
 data.ticketNumber ||
 data.ticket ||
 data.id;
@@ -570,9 +720,8 @@ data.checkedIn === true;
 
 
 const div =
-document.createElement(
-"div"
-);
+document.createElement("div");
+
 
 div.className="booking";
 
@@ -580,30 +729,67 @@ div.className="booking";
 div.innerHTML=`
 
 <h3>
+
 🎫 Ticket:
 ${escapeHTML(ticketNumber)}
+
 </h3>
 
+
 <p>
+
 <strong>👤 Name:</strong>
+
 ${escapeHTML(
 data.name || "N/A"
 )}
+
 </p>
 
+
 <p>
+
 <strong>📧 Email:</strong>
+
 ${escapeHTML(
 data.email || "N/A"
 )}
+
 </p>
 
+
 <p>
+
+<strong>📱 Phone:</strong>
+
+${escapeHTML(
+data.phone || "N/A"
+)}
+
+</p>
+
+
+<p>
+
 <strong>🎟️ Event:</strong>
+
 ${escapeHTML(
 data.event || "N/A"
 )}
+
 </p>
+
+
+<p>
+
+<strong>📅 Date:</strong>
+
+${escapeHTML(
+data.date || "N/A"
+)}
+
+</p>
+
 
 <p class="status">
 
@@ -636,9 +822,7 @@ onclick="deleteBooking('${data.id}')">
 `;
 
 
-bookingsDiv.appendChild(
-div
-);
+bookingsDiv.appendChild(div);
 
 });
 
@@ -647,8 +831,7 @@ div
 
 /* SEARCH */
 
-window.searchBookings =
-function(){
+window.searchBookings = function(){
 
 const search =
 document.getElementById(
@@ -677,19 +860,25 @@ allBookings.filter(
 const name =
 String(
 data.name || ""
-)
-.toLowerCase();
+).toLowerCase();
 
 
 const email =
 String(
 data.email || ""
-)
-.toLowerCase();
+).toLowerCase();
+
+
+const event =
+String(
+data.event || ""
+).toLowerCase();
 
 
 const ticket =
 String(
+
+data.ticketID ||
 
 data.ticketNumber ||
 
@@ -699,8 +888,7 @@ data.id ||
 
 ""
 
-)
-.toLowerCase();
+).toLowerCase();
 
 
 return(
@@ -709,6 +897,8 @@ name.includes(search) ||
 
 email.includes(search) ||
 
+event.includes(search) ||
+
 ticket.includes(search)
 
 );
@@ -716,17 +906,14 @@ ticket.includes(search)
 });
 
 
-displayBookings(
-results
-);
+displayBookings(results);
 
 };
 
 
 /* CHECK IN */
 
-window.checkInTicket =
-async function(){
+window.checkInTicket = async function(){
 
 const ticket =
 document.getElementById(
@@ -756,7 +943,7 @@ if(!ticket){
 message.style.color="red";
 
 message.textContent=
-"Please enter a Ticket Number.";
+"❌ Please enter a Ticket Number.";
 
 return;
 
@@ -766,10 +953,15 @@ return;
 message.style.color="black";
 
 message.textContent=
-"Checking...";
+"⏳ Checking ticket...";
 
 
 try{
+
+
+/*
+FIRST SEARCH INSIDE LOADED BOOKINGS
+*/
 
 let found =
 allBookings.find(
@@ -777,6 +969,8 @@ allBookings.find(
 
 const number =
 String(
+
+b.ticketID ||
 
 b.ticketNumber ||
 
@@ -793,49 +987,62 @@ return number === ticket;
 });
 
 
-/* SEARCH FIREBASE */
+
+/*
+IF NOT FOUND, SEARCH FIREBASE
+*/
 
 if(!found){
 
-const q =
-query(
+let snapshot =
+await getDocs(
+collection(db,"bookings")
+);
 
-collection(
-db,
-"bookings"
-),
 
-where(
-"ticketNumber",
-"==",
-ticket
-)
+snapshot.forEach(
+(d)=>{
+
+const data =
+d.data();
+
+
+const number =
+String(
+
+data.ticketID ||
+
+data.ticketNumber ||
+
+data.ticket ||
+
+d.id ||
+
+""
 
 );
 
 
-const snapshot =
-await getDocs(q);
-
-
-if(!snapshot.empty){
-
-const d =
-snapshot.docs[0];
-
+if(number === ticket){
 
 found={
 
 id:d.id,
 
-...d.data()
+...data
 
 };
 
 }
 
+});
+
 }
 
+
+/*
+TICKET NOT FOUND
+*/
 
 if(!found){
 
@@ -849,7 +1056,9 @@ return;
 }
 
 
-/* SHOW INFORMATION */
+/*
+SHOW TICKET INFORMATION
+*/
 
 result.innerHTML=`
 
@@ -860,30 +1069,52 @@ result.innerHTML=`
 </h3>
 
 <p>
+
 <strong>👤 Name:</strong>
+
 ${escapeHTML(
 found.name || "N/A"
 )}
+
 </p>
 
 <p>
+
 <strong>📧 Email:</strong>
+
 ${escapeHTML(
 found.email || "N/A"
 )}
+
 </p>
 
 <p>
+
+<strong>📱 Phone:</strong>
+
+${escapeHTML(
+found.phone || "N/A"
+)}
+
+</p>
+
+<p>
+
 <strong>🎟️ Event:</strong>
+
 ${escapeHTML(
 found.event || "N/A"
 )}
+
 </p>
 
 <p>
-<strong>Ticket Number:</strong>
+
+<strong>🎫 Ticket Number:</strong>
 
 ${escapeHTML(
+
+found.ticketID ||
 
 found.ticketNumber ||
 
@@ -919,9 +1150,11 @@ found.checkedIn === true
 `;
 
 
-if(
-found.checkedIn === true
-){
+/*
+ALREADY CHECKED IN
+*/
+
+if(found.checkedIn === true){
 
 message.style.color="orange";
 
@@ -933,7 +1166,9 @@ return;
 }
 
 
-/* SAVE CHECK-IN */
+/*
+SAVE CHECK-IN
+*/
 
 await updateDoc(
 
@@ -976,14 +1211,15 @@ console.error(error);
 message.style.color="red";
 
 message.textContent=
-"❌ Check-in failed.";
+"❌ Check-in failed: " +
+error.message;
 
 }
 
 };
 
 
-/* DELETE */
+/* DELETE BOOKING */
 
 window.deleteBooking =
 async function(id){
@@ -1037,8 +1273,7 @@ alert(
 
 /* EXPORT CSV */
 
-window.exportCSV =
-function(){
+window.exportCSV = function(){
 
 if(allBookings.length===0){
 
@@ -1052,7 +1287,7 @@ return;
 
 
 let csv =
-"Name,Email,Event,Ticket Number,Status\n";
+"Name,Email,Phone,Event,Ticket Number,Date,Status\n";
 
 
 allBookings.forEach(
@@ -1070,6 +1305,12 @@ data.email || ""
 );
 
 
+const phone =
+csvValue(
+data.phone || ""
+);
+
+
 const event =
 csvValue(
 data.event || ""
@@ -1079,6 +1320,8 @@ data.event || ""
 const ticket =
 csvValue(
 
+data.ticketID ||
+
 data.ticketNumber ||
 
 data.ticket ||
@@ -1087,6 +1330,12 @@ data.id ||
 
 ""
 
+);
+
+
+const date =
+csvValue(
+data.date || ""
 );
 
 
@@ -1103,7 +1352,7 @@ data.checkedIn === true
 
 
 csv +=
-`${name},${email},${event},${ticket},${status}\n`;
+`${name},${email},${phone},${event},${ticket},${date},${csvValue(status)}\n`;
 
 });
 
@@ -1122,15 +1371,11 @@ type:
 
 
 const url =
-URL.createObjectURL(
-blob
-);
+URL.createObjectURL(blob);
 
 
 const link =
-document.createElement(
-"a"
-);
+document.createElement("a");
 
 
 link.href=url;
@@ -1139,25 +1384,18 @@ link.download=
 "event-bookings.csv";
 
 
-document.body.appendChild(
-link
-);
+document.body.appendChild(link);
 
 link.click();
 
-document.body.removeChild(
-link
-);
+document.body.removeChild(link);
 
-
-URL.revokeObjectURL(
-url
-);
+URL.revokeObjectURL(url);
 
 };
 
 
-/* HELPERS */
+/* CSV HELPER */
 
 function csvValue(value){
 
@@ -1166,6 +1404,8 @@ return `"${String(value)
 
 }
 
+
+/* HTML SECURITY HELPER */
 
 function escapeHTML(value){
 
@@ -1183,7 +1423,5 @@ return String(value)
 
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
