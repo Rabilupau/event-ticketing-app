@@ -1,0 +1,81 @@
+body{
+    font-family: Arial, sans-serif;
+    background:#f2f2f2;
+    text-align:center;
+    margin:0;
+    padding:20px;
+}
+
+
+h1{
+    color:green;
+}
+
+
+.container{
+
+    background:white;
+    max-width:400px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+
+}
+
+
+input, select, button{
+
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    font-size:16px;
+    box-sizing:border-box;
+
+}
+
+
+button{
+
+    background:green;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+
+}
+
+
+button:hover{
+
+    background:darkgreen;
+
+}
+
+
+#message{
+
+    margin-top:15px;
+    font-weight:bold;
+
+}
+
+
+#ticket{
+
+    margin-top:20px;
+    text-align:left;
+    background:#eee;
+    padding:15px;
+    border-radius:8px;
+
+}
+
+
+#qrcode{
+
+    margin:20px auto;
+    display:flex;
+    justify-content:center;
+
+}
