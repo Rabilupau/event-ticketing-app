@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard - Event Booking</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+}
+
+/* LOGIN */
+
+#loginPage{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.login-box{
+    background:white;
+    width:100%;
+    max-width:400px;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
+}
+
+.login-box h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.login-box input{
+    width:100%;
+    padding:13px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.login-box button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+    background:#007bff;
+    color:white;
+    font-size:16px;
+}
+
+#error{
+    color:red;
+    text-align:center;
+    margin-top:15px;
+}
+
+/* DASHBOARD */
+
+#dashboardPage{
+    display:none;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+/* STATS */
+
+.stats{
+    max-width:700px;
+    margin:20px auto;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.stat{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.stat h2{
+    margin:0;
+    font-size:30px;
+}
+
+.stat p{
+    margin:8px 0 0;
+    color:#666;
+}
+
+/* EVENT STATISTICS */
+
+.section-title{
+    text-align:center;
+    margin-top:30px;
+}
+
+.event-stats{
+    max-width:700px;
+    margin:15px auto;
+}
+
+.event-card{
+    background:white;
+    padding:16px;
+    margin:10px 0;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.event-name{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.event-row{
+    display:flex;
+    justify-content:space-between;
+    margin:7px 0;
+}
+
+/* SEARCH */
+
+.search-box{
+    max-width:700px;
+    margin:25px auto 15px;
+}
+
+.search-box input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+/* BUTTONS */
+
+.button-area{
+    max-width:700px;
+    margin:15px auto;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.refresh,
+.export{
+    padding:11px 20px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.refresh{
+    background:#198754;
+}
+
+.export{
+    background:#6f42c1;
+}
+
+.logout{
+    display:block;
+    margin:10px auto 25px;
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#dc3545;
+    color:white;
+    cursor:pointer;
+}
+
+/* BOOKINGS */
+
+.booking{
+    background:white;
+    padding:16px;
+    margin:15px auto;
+    max-width:700px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.booking p{
+    margin:8px 0;
+}
+
+.ticket-number{
+    background:#e8f5e9;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+.checked{
+    color:#198754;
+    font-weight:bold;
+}
+
+.not-checked{
+    color:#dc3545;
+    font-weight:bold;
+}
+
+.loading{
+    text-align:center;
+    font-size:18px;
+    padding:20px;
+}
+
+@media(max-width:500px){
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .stat h2{
+        font-size:25px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- LOGIN -->
+
+<div id="loginPage">
+
+<div class="login-box">
+
+<h2>🔐 Admin Login</h2>
+
+<input
+    type="text"
+    id="username"
+    placeholder="Username"
+>
+
+<input
+    type="password"
+    id="password"
+    placeholder="Password"
+>
+
+<button onclick="login()">
+Login
+</button>
+
+<div id="error"></div>
+
+</div>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboardPage">
+
+<h1>
+📊 Event Booking Dashboard
+</h1>
+
+<button class="logout" onclick="logout()">
+Logout
+</button>
+
+
+<!-- GENERAL STATS -->
+
+<div class="stats">
+
+<div class="stat">
+
+<h2 id="totalBookings">
+0
+</h2>
+
+<p>
+👥 Total Bookings
+</p>
+
+</div>
+
+
+<div class="stat">
+
+<h2 id="totalTickets">
+0
+</h2>
+
+<p>
+🎟️ Total Tickets
+</p>
+
+</div>
+
+
+<div class="stat">
+
+<h2 id="checkedIn">
+0
+</h2>
+
+<p>
+✅ Checked-in
+</p>
+
+</div>
+
+
+<div class="stat">
+
+<h2 id="notCheckedIn">
+0
+</h2>
+
+<p>
+⏳ Not Checked-in
+</p>
+
+</div>
+
+</div>
+
+
+<!-- EVENT STATISTICS -->
+
+<h2 class="section-title">
+🎪 Event Statistics
+</h2>
+
+<div
+    id="eventStats"
+    class="event-stats"
+>
+
+<div class="loading">
+Loading event statistics...
+</div>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<div class="search-box">
+
+<input
+    type="text"
+    id="searchInput"
+    placeholder="🔎 Search name, email, event or ticket..."
+>
+
+</div>
+
+
+<!-- BUTTONS -->
+
+<div class="button-area">
+
+<button
+    class="refresh"
+    onclick="loadBookings()"
+>
+🔄 Refresh Dashboard
+</button>
+
+<button
+    class="export"
+    onclick="exportBookings()"
+>
+📥 Export Bookings
+</button>
+
+</div>
+
+
+<!-- BOOKINGS -->
+
+<div id="bookings">
+
+<div class="loading">
+Loading bookings...
+</div>
+
+</div>
+
+</div>
+
+
+<script type="module">
+
+
+/* FIREBASE */
+
+import {
+    initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+import {
+    getFirestore,
+    collection,
+    getDocs
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+    apiKey:
+    "AIzaSyC-T2k0YrJOfQb7LV5qcUsOPwvWI_edXKM",
+
+    authDomain:
+    "event-booking-app-ee02b.firebaseapp.com",
+
+    projectId:
+    "event-booking-app-ee02b",
+
+    storageBucket:
+    "event-booking-app-ee02b.firebasestorage.app",
+
+    messagingSenderId:
+    "YOUR_MESSAGING_SENDER_ID",
+
+    appId:
+    "YOUR_APP_ID"
+
+};
+
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+
+/* ADMIN LOGIN */
+
+const ADMIN_USERNAME =
+"Rabilupau";
+
+const ADMIN_PASSWORD =
+"Rabilu@123";
+
+
+/* STORE BOOKINGS */
+
+let allBookings = [];
+
+
+/* LOGIN */
+
+window.login =
+function(){
+
+    const username =
+    document.getElementById(
+        "username"
+    ).value.trim();
+
+    const password =
+    document.getElementById(
+        "password"
+    ).value;
+
+    const error =
+    document.getElementById(
+        "error"
+    );
+
+
+    if(
+        username === ADMIN_USERNAME &&
+        password === ADMIN_PASSWORD
+    ){
+
+        sessionStorage.setItem(
+            "adminLoggedIn",
+            "true"
+        );
+
+
+        document.getElementById(
+            "loginPage"
+        ).style.display =
+        "none";
+
+
+        document.getElementById(
+            "dashboardPage"
+        ).style.display =
+        "block";
+
+
+        loadBookings();
+
+    }
+
+    else{
+
+        error.textContent =
+        "Username ko Password ba daidai ba.";
+
+    }
+
+};
+
+
+/* LOGOUT */
+
+window.logout =
+function(){
+
+    sessionStorage.removeItem(
+        "adminLoggedIn"
+    );
+
+    location.reload();
+
+};
+
+
+/* CHECK LOGIN */
+
+if(
+    sessionStorage.getItem(
+        "adminLoggedIn"
+    ) === "true"
+){
+
+    document.getElementById(
+        "loginPage"
+    ).style.display =
+    "none";
+
+
+    document.getElementById(
+        "dashboardPage"
+    ).style.display =
+    "block";
+
+
+    loadBookings();
+
+}
+
+
+/* LOAD BOOKINGS */
+
+window.loadBookings =
+async function(){
+
+    const bookingsDiv =
+    document.getElementById(
+        "bookings"
+    );
+
+
+    bookingsDiv.innerHTML =
+    "<div class='loading'>Loading bookings...</div>";
+
+
+    try{
+
+        const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "bookings"
+            )
+        );
+
+
+        allBookings = [];
+
+
+        snapshot.forEach(
+            (docSnapshot)=>{
+
+                allBookings.push({
+
+                    id:
+                    docSnapshot.id,
+
+                    ...docSnapshot.data()
+
+                });
+
+            }
+        );
+
+
+        updateStatistics();
+
+        displayBookings(
+            allBookings
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        bookingsDiv.innerHTML = `
+
+        <div class="loading">
+
+        Error loading bookings.
+
+        <br><br>
+
+        ${error.message}
+
+        </div>
+
+        `;
+
+    }
+
+};
+
+
+/* STATISTICS */
+
+function updateStatistics(){
+
+    const total =
+    allBookings.length;
+
+    let checked = 0;
+
+    let notChecked = 0;
+
+    const events = {};
+
+
+    allBookings.forEach(
+        (data)=>{
+
+            if(
+                data.checkedIn === true
+            ){
+
+                checked++;
+
+            }
+
+            else{
+
+                notChecked++;
+
+            }
+
+
+            const eventName =
+            data.event ||
+            "Other";
+
+
+            if(
+                !events[eventName]
+            ){
+
+                events[eventName] = {
+
+                    total:0,
+
+                    checked:0,
+
+                    notChecked:0
+
+                };
+
+            }
+
+
+            events[eventName].total++;
+
+
+            if(
+                data.checkedIn === true
+            ){
+
+                events[eventName].checked++;
+
+            }
+
+            else{
+
+                events[eventName].notChecked++;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalBookings"
+    ).textContent =
+    total;
+
+
+    document.getElementById(
+        "totalTickets"
+    ).textContent =
+    total;
+
+
+    document.getElementById(
+        "checkedIn"
+    ).textContent =
+    checked;
+
+
+    document.getElementById(
+        "notCheckedIn"
+    ).textContent =
+    notChecked;
+
+
+    const eventStats =
+    document.getElementById(
+        "eventStats"
+    );
+
+
+    const eventNames =
+    Object.keys(events);
+
+
+    if(
+        eventNames.length === 0
+    ){
+
+        eventStats.innerHTML =
+        "<div class='loading'>No event bookings yet.</div>";
+
+        return;
+
+    }
+
+
+    eventNames.sort();
+
+    eventStats.innerHTML = "";
+
+
+    eventNames.forEach(
+        (eventName)=>{
+
+            const event =
+            events[eventName];
+
+
+            const card =
+            document.createElement(
+                "div"
+            );
+
+
+            card.className =
+            "event-card";
+
+
+            card.innerHTML = `
+
+            <div class="event-name">
+
+            🎪 ${eventName}
+
+            </div>
+
+            <div class="event-row">
+
+            <span>
+            🎟️ Total Tickets
+            </span>
+
+            <strong>
+            ${event.total}
+            </strong>
+
+            </div>
+
+            <div class="event-row">
+
+            <span>
+            ✅ Checked-in
+            </span>
+
+            <strong>
+            ${event.checked}
+            </strong>
+
+            </div>
+
+            <div class="event-row">
+
+            <span>
+            ⏳ Not Checked-in
+            </span>
+
+            <strong>
+            ${event.notChecked}
+            </strong>
+
+            </div>
+
+            `;
+
+
+            eventStats.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* DISPLAY BOOKINGS */
+
+function displayBookings(
+    bookings
+){
+
+    const bookingsDiv =
+    document.getElementById(
+        "bookings"
+    );
+
+
+    if(
+        bookings.length === 0
+    ){
+
+        bookingsDiv.innerHTML =
+        "<div class='loading'>No bookings found.</div>";
+
+        return;
+
+    }
+
+
+    bookingsDiv.innerHTML = "";
+
+
+    bookings.forEach(
+        (data)=>{
+
+            const booking =
+            document.createElement(
+                "div"
+            );
+
+
+            booking.className =
+            "booking";
+
+
+            const status =
+            data.checkedIn === true
+
+            ?
+
+            "<span class='checked'>✅ Checked-in</span>"
+
+            :
+
+            "<span class='not-checked'>⏳ Not Checked-in</span>";
+
+
+            booking.innerHTML = `
+
+            <div class="ticket-number">
+
+            🎟️ Ticket Number:
+
+            ${data.ticketID || "N/A"}
+
+            </div>
+
+
+            <p>
+
+            <strong>Name:</strong>
+
+            ${data.name || ""}
+
+            </p>
+
+
+            <p>
+
+            <strong>Email:</strong>
+
+            ${data.email || ""}
+
+            </p>
+
+
+            <p>
+
+            <strong>Phone:</strong>
+
+            ${data.phone || ""}
+
+            </p>
+
+
+            <p>
+
+            <strong>Event:</strong>
+
+            ${data.event || ""}
+
+            </p>
+
+
+            <p>
+
+            <strong>Date:</strong>
+
+            ${data.date || ""}
+
+            </p>
+
+
+            <p>
+
+            <strong>Status:</strong>
+
+            ${status}
+
+            </p>
+
+
+            <p>
+
+            <strong>Booking ID:</strong>
+
+            ${data.id}
+
+            </p>
+
+            `;
+
+
+            bookingsDiv.appendChild(
+                booking
+            );
+
+        }
+    );
+
+}
+
+
+/* SEARCH */
+
+document
+.getElementById(
+    "searchInput"
+)
+.addEventListener(
+    "input",
+    function(){
+
+        const search =
+        this.value
+        .trim()
+        .toLowerCase();
+
+
+        if(!search){
+
+            displayBookings(
+                allBookings
+            );
+
+            return;
+
+        }
+
+
+        const filtered =
+        allBookings.filter(
+            (data)=>{
+
+                const name =
+                (data.name || "")
+                .toLowerCase();
+
+                const email =
+                (data.email || "")
+                .toLowerCase();
+
+                const event =
+                (data.event || "")
+                .toLowerCase();
+
+                const ticket =
+                (data.ticketID || "")
+                .toLowerCase();
+
+
+                return (
+
+                    name.includes(search) ||
+
+                    email.includes(search) ||
+
+                    event.includes(search) ||
+
+                    ticket.includes(search)
+
+                );
+
+            }
+        );
+
+
+        displayBookings(
+            filtered
+        );
+
+    }
+);
+
+
+/* EXPORT BOOKINGS TO CSV */
+
+window.exportBookings =
+function(){
+
+    if(
+        allBookings.length === 0
+    ){
+
+        alert(
+            "Babu booking da za a export."
+        );
+
+        return;
+
+    }
+
+
+    let csv =
+    "Ticket Number,Name,Email,Phone,Event,Date,Status,Booking ID\n";
+
+
+    allBookings.forEach(
+        (data)=>{
+
+            const ticket =
+            data.ticketID || "";
+
+            const name =
+            data.name || "";
+
+            const email =
+            data.email || "";
+
+            const phone =
+            data.phone || "";
+
+            const event =
+            data.event || "";
+
+            const date =
+            data.date || "";
+
+            const status =
+            data.checkedIn === true
+            ? "Checked-in"
+            : "Not Checked-in";
+
+            const id =
+            data.id || "";
+
+
+            csv +=
+            `"${escapeCSV(ticket)}",` +
+            `"${escapeCSV(name)}",` +
+            `"${escapeCSV(email)}",` +
+            `"${escapeCSV(phone)}",` +
+            `"${escapeCSV(event)}",` +
+            `"${escapeCSV(date)}",` +
+            `"${escapeCSV(status)}",` +
+            `"${escapeCSV(id)}"\n`;
+
+        }
+    );
+
+
+    const blob =
+    new Blob(
+        [csv],
+        {
+            type:
+            "text/csv;charset=utf-8;"
+        }
+    );
+
+
+    const url =
+    URL.createObjectURL(blob);
+
+
+    const link =
+    document.createElement("a");
+
+
+    link.href =
+    url;
+
+
+    const now =
+    new Date();
+
+
+    const fileDate =
+    now.getFullYear() +
+    "-" +
+    String(
+        now.getMonth()+1
+    ).padStart(2,"0") +
+    "-" +
+    String(
+        now.getDate()
+    ).padStart(2,"0");
+
+
+    link.download =
+    "event-bookings-" +
+    fileDate +
+    ".csv";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+};
+
+
+/* CSV SAFETY */
+
+function escapeCSV(value){
+
+    return String(value)
+        .replace(/"/g,'""');
+
+}
+
+</script>
+
+</body>
