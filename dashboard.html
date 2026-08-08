@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Event Ticketing Dashboard</title>
+<title>Event Ticketing Admin Dashboard</title>
 
 <style>
 *{
@@ -15,58 +15,90 @@ body{
   font-family:Arial,sans-serif;
   background:#f2f2f2;
   margin:0;
-  padding:20px;
+  padding:15px;
+  color:#222;
 }
 
 .container{
-  max-width:700px;
+  max-width:900px;
   margin:auto;
 }
 
 h1{
   text-align:center;
-  color:#222;
 }
 
 .card{
   background:white;
   padding:20px;
-  margin:20px 0;
+  margin:15px 0;
   border-radius:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.stat{
+  background:white;
+  padding:18px 10px;
+  text-align:center;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+.stat h2{
+  margin:5px 0;
+  font-size:28px;
+}
+
+.stat p{
+  margin:0;
+  font-size:14px;
 }
 
 input{
   width:100%;
   padding:12px;
-  margin:8px 0;
+  margin:7px 0;
   border:1px solid #ccc;
-  border-radius:6px;
+  border-radius:7px;
   font-size:16px;
 }
 
 button{
   width:100%;
   padding:12px;
-  border:none;
-  border-radius:6px;
+  margin-top:8px;
+  border:0;
+  border-radius:7px;
   background:#007bff;
   color:white;
   font-size:16px;
   cursor:pointer;
-  margin-top:8px;
 }
 
 button:hover{
-  opacity:0.9;
+  opacity:.9;
 }
 
-.logout{
+.green{
+  background:#28a745;
+}
+
+.red{
   background:#dc3545;
 }
 
-.checkin{
-  background:#28a745;
+.orange{
+  background:#f39c12;
+}
+
+.dark{
+  background:#343a40;
 }
 
 #dashboard{
@@ -76,30 +108,53 @@ button:hover{
 #loginMessage,
 #checkinMessage{
   text-align:center;
-  margin-top:10px;
   font-weight:bold;
 }
 
 .booking{
+  background:#fafafa;
   border:1px solid #ddd;
   padding:15px;
   margin:12px 0;
-  border-radius:8px;
-  background:#fafafa;
+  border-radius:9px;
 }
 
 .booking h3{
   margin-top:0;
 }
 
+.status{
+  font-weight:bold;
+}
+
 .checked{
   color:green;
-  font-weight:bold;
 }
 
 .notchecked{
   color:#d9534f;
-  font-weight:bold;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.actions button{
+  margin-top:0;
+}
+
+@media(max-width:600px){
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .actions{
+    grid-template-columns:1fr;
+  }
+
 }
 </style>
 </head>
@@ -109,23 +164,24 @@ button:hover{
 <div class="container">
 
 <!-- LOGIN -->
+
 <div id="loginBox" class="card">
 
-<h1>Admin Login</h1>
+<h1>🔐 Admin Login</h1>
 
 <input
-  type="text"
-  id="username"
-  placeholder="Username"
->
+type="text"
+id="username"
+placeholder="Username">
 
 <input
-  type="password"
-  id="password"
-  placeholder="Password"
->
+type="password"
+id="password"
+placeholder="Password">
 
-<button onclick="login()">Login</button>
+<button onclick="login()">
+Login
+</button>
 
 <p id="loginMessage"></p>
 
@@ -133,46 +189,118 @@ button:hover{
 
 
 <!-- DASHBOARD -->
+
 <div id="dashboard">
 
-<h1>Event Ticketing Dashboard</h1>
+<h1>🎟️ Event Admin Dashboard</h1>
+
+
+<!-- STATISTICS -->
+
+<div class="stats">
+
+<div class="stat">
+<h2 id="totalBookings">0</h2>
+<p>📊 Total Bookings</p>
+</div>
+
+<div class="stat">
+<h2 id="checkedInCount">0</h2>
+<p>✅ Checked In</p>
+</div>
+
+<div class="stat">
+<h2 id="notCheckedCount">0</h2>
+<p>⏳ Not Checked In</p>
+</div>
+
+</div>
+
 
 <!-- CHECK IN -->
+
 <div class="card">
 
-<h2>🎟️ Ticket Check-in</h2>
+<h2>🎫 Ticket Check-in</h2>
 
-<p>Enter the customer's Ticket Number below.</p>
+<p>Enter Ticket Number:</p>
 
 <input
-  type="text"
-  id="ticketNumber"
-  placeholder="Enter Ticket Number"
->
+type="text"
+id="ticketNumber"
+placeholder="Enter Ticket Number">
 
-<button class="checkin" onclick="checkInTicket()">
-  Check In
+<button
+class="green"
+onclick="checkInTicket()">
+
+Check In
+
 </button>
+
+<div id="checkinResult"></div>
 
 <p id="checkinMessage"></p>
 
 </div>
 
 
+<!-- SEARCH -->
+
+<div class="card">
+
+<h2>🔍 Search Bookings</h2>
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search by name, email or ticket number"
+oninput="searchBookings()">
+
+<div class="actions">
+
+<button
+class="dark"
+onclick="loadBookings()">
+
+🔄 Refresh
+
+</button>
+
+<button
+class="green"
+onclick="exportCSV()">
+
+📥 Export CSV
+
+</button>
+
+</div>
+
+</div>
+
+
 <!-- BOOKINGS -->
+
 <div class="card">
 
 <h2>📋 All Bookings</h2>
 
 <div id="bookings">
-  Loading bookings...
+Loading bookings...
 </div>
 
 </div>
 
 
-<button class="logout" onclick="logout()">
-  Logout
+<!-- LOGOUT -->
+
+<button
+class="red"
+onclick="logout()">
+
+🚪 Logout
+
 </button>
 
 </div>
@@ -182,18 +310,23 @@ button:hover{
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+/* FIREBASE */
 
 import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  query,
-  where,
-  getDoc
+initializeApp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+updateDoc,
+deleteDoc,
+query,
+where
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -202,58 +335,83 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
-  apiKey: "AIzaSyC-T2k0YrJOfQb7LV5qcUsOPwvWI_edXKM",
+apiKey:
+"AIzaSyC-T2k0YrJOfQb7LV5qcUsOPwvWI_edXKM",
 
-  authDomain: "event-booking-app-ee02b.firebaseapp.com",
+authDomain:
+"event-booking-app-ee02b.firebaseapp.com",
 
-  projectId: "event-booking-app-ee02b",
+projectId:
+"event-booking-app-ee02b",
 
-  storageBucket: "event-booking-app-ee02b.firebasestorage.app",
+storageBucket:
+"event-booking-app-ee02b.firebasestorage.app",
 
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+messagingSenderId:
+"526513199259",
 
-  appId: "YOUR_APP_ID"
+appId:
+"1:526513199259:web:92442ef0079e07a0364e3e",
+
+measurementId:
+"G-QXSZ66ZFRR"
 
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app =
+initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+const db =
+getFirestore(app);
+
+
+let allBookings = [];
 
 
 /* LOGIN */
 
 window.login = function(){
 
-  const username =
-    document.getElementById("username").value.trim();
+const username =
+document.getElementById(
+"username"
+).value.trim();
 
-  const password =
-    document.getElementById("password").value.trim();
+const password =
+document.getElementById(
+"password"
+).value.trim();
 
-  const message =
-    document.getElementById("loginMessage");
+const message =
+document.getElementById(
+"loginMessage"
+);
 
 
-  if(
-    username === "Rabilupau" &&
-    password === "Rabilu@123"
-  ){
+if(
+username === "Rabilupau" &&
+password === "Rabilu@123"
+){
 
-    document.getElementById("loginBox").style.display="none";
+document.getElementById(
+"loginBox"
+).style.display="none";
 
-    document.getElementById("dashboard").style.display="block";
+document.getElementById(
+"dashboard"
+).style.display="block";
 
-    loadBookings();
+loadBookings();
 
-  }else{
+}else{
 
-    message.style.color="red";
+message.style.color="red";
 
-    message.textContent="Incorrect username or password.";
+message.textContent=
+"Incorrect username or password.";
 
-  }
+}
 
 };
 
@@ -262,275 +420,768 @@ window.login = function(){
 
 window.logout = function(){
 
-  document.getElementById("dashboard").style.display="none";
+document.getElementById(
+"dashboard"
+).style.display="none";
 
-  document.getElementById("loginBox").style.display="block";
+document.getElementById(
+"loginBox"
+).style.display="block";
 
-  document.getElementById("username").value="";
+document.getElementById(
+"username"
+).value="";
 
-  document.getElementById("password").value="";
+document.getElementById(
+"password"
+).value="";
 
 };
 
 
 /* LOAD BOOKINGS */
 
-async function loadBookings(){
+window.loadBookings =
+async function(){
 
-  const bookingsDiv =
-    document.getElementById("bookings");
+const bookingsDiv =
+document.getElementById(
+"bookings"
+);
 
-  bookingsDiv.innerHTML="Loading bookings...";
-
-  try{
-
-    const snapshot =
-      await getDocs(collection(db,"bookings"));
-
-    bookingsDiv.innerHTML="";
-
-    if(snapshot.empty){
-
-      bookingsDiv.innerHTML=
-        "<p>No bookings found.</p>";
-
-      return;
-    }
+bookingsDiv.innerHTML=
+"Loading bookings...";
 
 
-    snapshot.forEach((bookingDoc)=>{
+try{
 
-      const data = bookingDoc.data();
-
-      const ticketNumber =
-        data.ticketNumber ||
-        data.ticket ||
-        bookingDoc.id;
-
-      const checkedIn =
-        data.checkedIn === true;
+const snapshot =
+await getDocs(
+collection(db,"bookings")
+);
 
 
-      const div =
-        document.createElement("div");
-
-      div.className="booking";
+allBookings=[];
 
 
-      div.innerHTML=`
+snapshot.forEach(
+(bookingDoc)=>{
 
-        <h3>🎟️ Ticket: ${ticketNumber}</h3>
+allBookings.push({
 
-        <p>
-          <strong>Name:</strong>
-          ${data.name || "N/A"}
-        </p>
+id:bookingDoc.id,
 
-        <p>
-          <strong>Email:</strong>
-          ${data.email || "N/A"}
-        </p>
+...bookingDoc.data()
 
-        <p>
-          <strong>Event:</strong>
-          ${data.event || "N/A"}
-        </p>
+});
 
-        <p>
-          Status:
-          ${
-            checkedIn
-            ? '<span class="checked">✅ Checked In</span>'
-            : '<span class="notchecked">❌ Not Checked In</span>'
-          }
-        </p>
+});
 
-      `;
 
-      bookingsDiv.appendChild(div);
+updateStatistics();
 
-    });
+displayBookings(
+allBookings
+);
 
-  }catch(error){
 
-    console.error(error);
+}catch(error){
 
-    bookingsDiv.innerHTML=
-      "<p>Unable to load bookings.</p>";
+console.error(error);
 
-  }
+bookingsDiv.innerHTML=
+"❌ Unable to load bookings.";
+
+}
+
+};
+
+
+/* STATISTICS */
+
+function updateStatistics(){
+
+const total =
+allBookings.length;
+
+
+const checked =
+allBookings.filter(
+b => b.checkedIn === true
+).length;
+
+
+const notChecked =
+total - checked;
+
+
+document.getElementById(
+"totalBookings"
+).textContent=total;
+
+
+document.getElementById(
+"checkedInCount"
+).textContent=checked;
+
+
+document.getElementById(
+"notCheckedCount"
+).textContent=notChecked;
 
 }
 
 
-/* CHECK IN */
+/* DISPLAY BOOKINGS */
 
-window.checkInTicket = async function(){
+function displayBookings(
+bookings
+){
 
-  const ticketInput =
-    document.getElementById("ticketNumber");
+const bookingsDiv =
+document.getElementById(
+"bookings"
+);
 
-  const message =
-    document.getElementById("checkinMessage");
+bookingsDiv.innerHTML="";
 
-  const ticketNumber =
-    ticketInput.value.trim();
 
+if(bookings.length===0){
 
-  if(!ticketNumber){
+bookingsDiv.innerHTML=
+"<p>No bookings found.</p>";
 
-    message.style.color="red";
+return;
 
-    message.textContent=
-      "Please enter a Ticket Number.";
+}
 
-    return;
-  }
 
+bookings.forEach(
+(data)=>{
 
-  message.style.color="black";
+const ticketNumber =
+data.ticketNumber ||
+data.ticket ||
+data.id;
 
-  message.textContent="Checking...";
 
+const checked =
+data.checkedIn === true;
 
-  try{
 
-    /*
-      First search using ticketNumber
-    */
+const div =
+document.createElement(
+"div"
+);
 
-    const q =
-      query(
-        collection(db,"bookings"),
-        where("ticketNumber","==",ticketNumber)
-      );
+div.className="booking";
 
 
-    const snapshot =
-      await getDocs(q);
+div.innerHTML=`
 
+<h3>
+🎫 Ticket:
+${escapeHTML(ticketNumber)}
+</h3>
 
-    if(snapshot.empty){
+<p>
+<strong>👤 Name:</strong>
+${escapeHTML(
+data.name || "N/A"
+)}
+</p>
 
-      /*
-        If ticketNumber field does not exist,
-        try using document ID.
-      */
+<p>
+<strong>📧 Email:</strong>
+${escapeHTML(
+data.email || "N/A"
+)}
+</p>
 
-      const bookingRef =
-        doc(db,"bookings",ticketNumber);
+<p>
+<strong>🎟️ Event:</strong>
+${escapeHTML(
+data.event || "N/A"
+)}
+</p>
 
-      const bookingSnap =
-        await getDoc(bookingRef);
+<p class="status">
 
+Status:
 
-      if(!bookingSnap.exists()){
+${
+checked
 
-        message.style.color="red";
+?
 
-        message.textContent=
-          "❌ Ticket not found.";
+'<span class="checked">✅ Checked In</span>'
 
-        return;
+:
 
-      }
+'<span class="notchecked">⏳ Not Checked In</span>'
 
+}
 
-      const data =
-        bookingSnap.data();
+</p>
 
 
-      if(data.checkedIn === true){
+<button
+class="red"
+onclick="deleteBooking('${data.id}')">
 
-        message.style.color="orange";
+🗑️ Delete Booking
 
-        message.textContent=
-          "⚠️ This ticket has already been checked in.";
+</button>
 
-        return;
+`;
 
-      }
 
+bookingsDiv.appendChild(
+div
+);
 
-      await updateDoc(
-        bookingRef,
-        {
-          checkedIn:true,
-          checkedInAt:new Date()
-        }
-      );
+});
 
+}
 
-      message.style.color="green";
 
-      message.textContent=
-        "✅ Check-in successful!";
+/* SEARCH */
 
+window.searchBookings =
+function(){
 
-      ticketInput.value="";
+const search =
+document.getElementById(
+"searchInput"
+)
+.value
+.toLowerCase()
+.trim();
 
-      loadBookings();
 
-      return;
+if(!search){
 
-    }
+displayBookings(
+allBookings
+);
 
+return;
 
-    /*
-      Ticket found by ticketNumber
-    */
+}
 
-    const bookingDoc =
-      snapshot.docs[0];
 
-    const data =
-      bookingDoc.data();
+const results =
+allBookings.filter(
+(data)=>{
 
+const name =
+String(
+data.name || ""
+)
+.toLowerCase();
 
-    if(data.checkedIn === true){
 
-      message.style.color="orange";
+const email =
+String(
+data.email || ""
+)
+.toLowerCase();
 
-      message.textContent=
-        "⚠️ This ticket has already been checked in.";
 
-      return;
+const ticket =
+String(
 
-    }
+data.ticketNumber ||
 
+data.ticket ||
 
-    await updateDoc(
-      doc(db,"bookings",bookingDoc.id),
-      {
-        checkedIn:true,
-        checkedInAt:new Date()
-      }
-    );
+data.id ||
 
+""
 
-    message.style.color="green";
+)
+.toLowerCase();
 
-    message.textContent=
-      "✅ Check-in successful!";
 
+return(
 
-    ticketInput.value="";
+name.includes(search) ||
 
-    loadBookings();
+email.includes(search) ||
 
+ticket.includes(search)
 
-  }catch(error){
+);
 
-    console.error(error);
+});
 
-    message.style.color="red";
 
-    message.textContent=
-      "❌ Check-in failed. Please try again.";
-
-  }
+displayBookings(
+results
+);
 
 };
+
+
+/* CHECK IN */
+
+window.checkInTicket =
+async function(){
+
+const ticket =
+document.getElementById(
+"ticketNumber"
+)
+.value
+.trim();
+
+
+const message =
+document.getElementById(
+"checkinMessage"
+);
+
+
+const result =
+document.getElementById(
+"checkinResult"
+);
+
+
+result.innerHTML="";
+
+
+if(!ticket){
+
+message.style.color="red";
+
+message.textContent=
+"Please enter a Ticket Number.";
+
+return;
+
+}
+
+
+message.style.color="black";
+
+message.textContent=
+"Checking...";
+
+
+try{
+
+let found =
+allBookings.find(
+(b)=>{
+
+const number =
+String(
+
+b.ticketNumber ||
+
+b.ticket ||
+
+b.id ||
+
+""
+
+);
+
+return number === ticket;
+
+});
+
+
+/* SEARCH FIREBASE */
+
+if(!found){
+
+const q =
+query(
+
+collection(
+db,
+"bookings"
+),
+
+where(
+"ticketNumber",
+"==",
+ticket
+)
+
+);
+
+
+const snapshot =
+await getDocs(q);
+
+
+if(!snapshot.empty){
+
+const d =
+snapshot.docs[0];
+
+
+found={
+
+id:d.id,
+
+...d.data()
+
+};
+
+}
+
+}
+
+
+if(!found){
+
+message.style.color="red";
+
+message.textContent=
+"❌ Ticket not found.";
+
+return;
+
+}
+
+
+/* SHOW INFORMATION */
+
+result.innerHTML=`
+
+<div class="booking">
+
+<h3>
+🎫 Ticket Found
+</h3>
+
+<p>
+<strong>👤 Name:</strong>
+${escapeHTML(
+found.name || "N/A"
+)}
+</p>
+
+<p>
+<strong>📧 Email:</strong>
+${escapeHTML(
+found.email || "N/A"
+)}
+</p>
+
+<p>
+<strong>🎟️ Event:</strong>
+${escapeHTML(
+found.event || "N/A"
+)}
+</p>
+
+<p>
+<strong>Ticket Number:</strong>
+
+${escapeHTML(
+
+found.ticketNumber ||
+
+found.ticket ||
+
+found.id
+
+)}
+
+</p>
+
+<p>
+
+<strong>Status:</strong>
+
+${
+found.checkedIn === true
+
+?
+
+'<span class="checked">✅ Already Checked In</span>'
+
+:
+
+'<span class="notchecked">⏳ Not Checked In</span>'
+
+}
+
+</p>
+
+</div>
+
+`;
+
+
+if(
+found.checkedIn === true
+){
+
+message.style.color="orange";
+
+message.textContent=
+"⚠️ This ticket has already been checked in.";
+
+return;
+
+}
+
+
+/* SAVE CHECK-IN */
+
+await updateDoc(
+
+doc(
+db,
+"bookings",
+found.id
+),
+
+{
+
+checkedIn:true,
+
+checkedInAt:
+new Date()
+
+}
+
+);
+
+
+message.style.color="green";
+
+message.textContent=
+"✅ Check-in successful!";
+
+
+document.getElementById(
+"ticketNumber"
+).value="";
+
+
+await loadBookings();
+
+
+}catch(error){
+
+console.error(error);
+
+message.style.color="red";
+
+message.textContent=
+"❌ Check-in failed.";
+
+}
+
+};
+
+
+/* DELETE */
+
+window.deleteBooking =
+async function(id){
+
+const confirmDelete =
+confirm(
+"Are you sure you want to delete this booking?"
+);
+
+
+if(!confirmDelete){
+
+return;
+
+}
+
+
+try{
+
+await deleteDoc(
+
+doc(
+db,
+"bookings",
+id
+)
+
+);
+
+
+alert(
+"✅ Booking deleted successfully."
+);
+
+
+loadBookings();
+
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"❌ Unable to delete booking."
+);
+
+}
+
+};
+
+
+/* EXPORT CSV */
+
+window.exportCSV =
+function(){
+
+if(allBookings.length===0){
+
+alert(
+"There are no bookings to export."
+);
+
+return;
+
+}
+
+
+let csv =
+"Name,Email,Event,Ticket Number,Status\n";
+
+
+allBookings.forEach(
+(data)=>{
+
+const name =
+csvValue(
+data.name || ""
+);
+
+
+const email =
+csvValue(
+data.email || ""
+);
+
+
+const event =
+csvValue(
+data.event || ""
+);
+
+
+const ticket =
+csvValue(
+
+data.ticketNumber ||
+
+data.ticket ||
+
+data.id ||
+
+""
+
+);
+
+
+const status =
+data.checkedIn === true
+
+?
+
+"Checked In"
+
+:
+
+"Not Checked In";
+
+
+csv +=
+`${name},${email},${event},${ticket},${status}\n`;
+
+});
+
+
+const blob =
+new Blob(
+
+[csv],
+
+{
+type:
+"text/csv;charset=utf-8;"
+}
+
+);
+
+
+const url =
+URL.createObjectURL(
+blob
+);
+
+
+const link =
+document.createElement(
+"a"
+);
+
+
+link.href=url;
+
+link.download=
+"event-bookings.csv";
+
+
+document.body.appendChild(
+link
+);
+
+link.click();
+
+document.body.removeChild(
+link
+);
+
+
+URL.revokeObjectURL(
+url
+);
+
+};
+
+
+/* HELPERS */
+
+function csvValue(value){
+
+return `"${String(value)
+.replace(/"/g,'""')}"`;
+
+}
+
+
+function escapeHTML(value){
+
+return String(value)
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
 
 </script>
 
