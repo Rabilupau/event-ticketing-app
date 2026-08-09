@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ticket Verification & QR Scanner</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+}
+
+.container{
+    max-width:500px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.12);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    text-transform:uppercase;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    background:#198754;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:disabled{
+    background:#777;
+}
+
+#scanButton{
+    background:#007bff;
+}
+
+#stopButton{
+    display:none;
+    background:#dc3545;
+}
+
+#checkInButton{
+    display:none;
+    background:#198754;
+}
+
+#reader{
+    width:100%;
+    margin-top:20px;
+    display:none;
+}
+
+#reader video{
+    width:100% !important;
+    border-radius:10px;
+}
+
+#message{
+    text-align:center;
+    margin-top:18px;
+    font-weight:bold;
+}
+
+.result{
+    display:none;
+    margin-top:20px;
+    padding:18px;
+    border-radius:10px;
+}
+
+.valid{
+    background:#e8f5e9;
+    border:2px solid #198754;
+}
+
+.already{
+    background:#fff3cd;
+    border:2px solid #ffc107;
+}
+
+.invalid{
+    background:#ffebee;
+    border:2px solid #dc3545;
+}
+
+.result h2{
+    text-align:center;
+    margin-top:0;
+}
+
+.info{
+    margin:10px 0;
+    word-break:break-word;
+}
+
+.back{
+    display:block;
+    text-align:center;
+    margin-top:20px;
+    padding:12px;
+    background:#212529;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎟️ Ticket Verification</h1>
+
+<div class="subtitle">
+Verify ticket using Ticket Number or QR Code
+</div>
+
+<label for="ticketInput">
+Ticket Number
+</label>
+
+<input
+    type="text"
+    id="ticketInput"
+    placeholder="Example: TICKET-123456"
+>
+
+<button id="verifyButton">
+🔎 Verify Ticket
+</button>
+
+<button id="scanButton">
+📷 Scan QR Code
+</button>
+
+<button id="stopButton">
+⛔ Stop Scanner
+</button>
+
+<div id="reader"></div>
+
+<div id="message"></div>
+
+<div id="result" class="result">
+
+<h2 id="resultTitle"></h2>
+
+<div class="info">
+<strong>Ticket Number:</strong>
+<span id="showTicket"></span>
+</div>
+
+<div class="info">
+<strong>Name:</strong>
+<span id="showName"></span>
+</div>
+
+<div class="info">
+<strong>Email:</strong>
+<span id="showEmail"></span>
+</div>
+
+<div class="info">
+<strong>Phone:</strong>
+<span id="showPhone"></span>
+</div>
+
+<div class="info">
+<strong>Event:</strong>
+<span id="showEvent"></span>
+</div>
+
+<div class="info">
+<strong>Date:</strong>
+<span id="showDate"></span>
+</div>
+
+<div class="info">
+<strong>Status:</strong>
+<span id="showStatus"></span>
+</div>
+
+</div>
+
+<button id="checkInButton">
+✅ Check In
+</button>
+
+<a href="index.html" class="back">
+← Back to Booking
+</a>
+
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script type="module">
+
+/* USE THE SAME FIREBASE CONFIG THAT IS ALREADY WORKING */
+
+import { db } from "./firebase-config.js";
+
+import {
+    collection,
+    getDocs,
+    updateDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+/* ELEMENTS */
+
+const ticketInput =
+    document.getElementById("ticketInput");
+
+const verifyButton =
+    document.getElementById("verifyButton");
+
+const scanButton =
+    document.getElementById("scanButton");
+
+const stopButton =
+    document.getElementById("stopButton");
+
+const checkInButton =
+    document.getElementById("checkInButton");
+
+const reader =
+    document.getElementById("reader");
+
+const message =
+    document.getElementById("message");
+
+const result =
+    document.getElementById("result");
+
+
+/* CURRENT TICKET */
+
+let currentDocId = null;
+
+let currentTicket = null;
+
+let scanner = null;
+
+
+/* MANUAL VERIFY */
+
+verifyButton.addEventListener(
+    "click",
+    function(){
+
+        verifyTicket(ticketInput.value);
+
+    }
+);
+
+
+/* ENTER KEY */
+
+ticketInput.addEventListener(
+    "keypress",
+    function(e){
+
+        if(e.key === "Enter"){
+
+            verifyTicket(ticketInput.value);
+
+        }
+
+    }
+);
+
+
+/* VERIFY TICKET */
+
+async function verifyTicket(value){
+
+    const ticketNumber =
+        value.trim().toUpperCase();
+
+    result.style.display = "none";
+
+    checkInButton.style.display = "none";
+
+    message.textContent = "";
+
+    currentDocId = null;
+
+    currentTicket = null;
+
+
+    if(!ticketNumber){
+
+        message.style.color = "#dc3545";
+
+        message.textContent =
+            "Please enter a Ticket Number.";
+
+        return;
+    }
+
+
+    verifyButton.disabled = true;
+
+    verifyButton.textContent =
+        "⏳ Checking...";
+
+
+    try{
+
+        const snapshot =
+            await getDocs(
+                collection(db,"bookings")
+            );
+
+
+        let found = null;
+
+        let foundDocId = null;
+
+
+        snapshot.forEach(
+            (documentSnapshot)=>{
+
+                const data =
+                    documentSnapshot.data();
+
+                if(
+                    data.ticketID &&
+                    String(data.ticketID)
+                        .toUpperCase()
+                        === ticketNumber
+                ){
+
+                    found = data;
+
+                    foundDocId =
+                        documentSnapshot.id;
+
+                }
+
+            }
+        );
+
+
+        if(!found){
+
+            showInvalid(ticketNumber);
+
+        }
+        else{
+
+            currentDocId =
+                foundDocId;
+
+            currentTicket =
+                found;
+
+            showTicket(found);
+
+        }
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Verification error:",
+            error
+        );
+
+        message.style.color =
+            "#dc3545";
+
+        message.textContent =
+            "Error: " + error.message;
+
+    }
+
+
+    verifyButton.disabled = false;
+
+    verifyButton.textContent =
+        "🔎 Verify Ticket";
+
+}
+
+
+/* SHOW VALID TICKET */
+
+function showTicket(data){
+
+    result.style.display =
+        "block";
+
+
+    document.getElementById(
+        "showTicket"
+    ).textContent =
+        data.ticketID || "";
+
+
+    document.getElementById(
+        "showName"
+    ).textContent =
+        data.name || "";
+
+
+    document.getElementById(
+        "showEmail"
+    ).textContent =
+        data.email || "";
+
+
+    document.getElementById(
+        "showPhone"
+    ).textContent =
+        data.phone || "";
+
+
+    document.getElementById(
+        "showEvent"
+    ).textContent =
+        data.event || "";
+
+
+    document.getElementById(
+        "showDate"
+    ).textContent =
+        data.date || "";
+
+
+    if(data.checkedIn === true){
+
+        result.className =
+            "result already";
+
+
+        document.getElementById(
+            "resultTitle"
+        ).textContent =
+            "⚠️ ALREADY CHECKED IN";
+
+
+        document.getElementById(
+            "showStatus"
+        ).textContent =
+            "Already Checked In";
+
+
+        message.style.color =
+            "#856404";
+
+
+        message.textContent =
+            "This ticket has already been used.";
+
+
+        checkInButton.style.display =
+            "none";
+
+    }
+
+    else{
+
+        result.className =
+            "result valid";
+
+
+        document.getElementById(
+            "resultTitle"
+        ).textContent =
+            "✅ VALID TICKET";
+
+
+        document.getElementById(
+            "showStatus"
+        ).textContent =
+            "Not Checked In";
+
+
+        message.style.color =
+            "#198754";
+
+
+        message.textContent =
+            "Ticket is valid and ready for check-in.";
+
+
+        checkInButton.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* INVALID TICKET */
+
+function showInvalid(ticketNumber){
+
+    result.style.display =
+        "block";
+
+    result.className =
+        "result invalid";
+
+
+    document.getElementById(
+        "resultTitle"
+    ).textContent =
+        "❌ INVALID TICKET";
+
+
+    document.getElementById(
+        "showTicket"
+    ).textContent =
+        ticketNumber;
+
+
+    document.getElementById(
+        "showName"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "showEmail"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "showPhone"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "showEvent"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "showDate"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "showStatus"
+    ).textContent =
+        "Invalid";
+
+
+    message.style.color =
+        "#dc3545";
+
+
+    message.textContent =
+        "Ticket Number not found.";
+
+}
+
+
+/* CHECK IN */
+
+checkInButton.addEventListener(
+    "click",
+    async function(){
+
+        if(!currentDocId){
+
+            message.style.color =
+                "#dc3545";
+
+            message.textContent =
+                "Please verify a ticket first.";
+
+            return;
+
+        }
+
+
+        checkInButton.disabled =
+            true;
+
+        checkInButton.textContent =
+            "⏳ Checking In...";
+
+
+        try{
+
+            const bookingRef =
+                doc(
+                    db,
+                    "bookings",
+                    currentDocId
+                );
+
+
+            await updateDoc(
+                bookingRef,
+                {
+                    checkedIn: true,
+
+                    checkInTime:
+                        new Date().toLocaleString()
+                }
+            );
+
+
+            currentTicket.checkedIn =
+                true;
+
+
+            showTicket(
+                currentTicket
+            );
+
+
+            document.getElementById(
+                "showStatus"
+            ).textContent =
+                "Checked In ✅";
+
+
+            message.style.color =
+                "#198754";
+
+
+            message.textContent =
+                "✅ Check-in successful!";
+
+
+            checkInButton.style.display =
+                "none";
+
+        }
+
+        catch(error){
+
+            console.error(
+                "Check-in error:",
+                error
+            );
+
+
+            message.style.color =
+                "#dc3545";
+
+
+            message.textContent =
+                "Check-in failed: " +
+                error.message;
+
+
+            checkInButton.disabled =
+                false;
+
+
+            checkInButton.textContent =
+                "✅ Check In";
+
+        }
+
+    }
+);
+
+
+/* START QR SCANNER */
+
+scanButton.addEventListener(
+    "click",
+    startScanner
+);
+
+
+async function startScanner(){
+
+    reader.style.display =
+        "block";
+
+    scanButton.style.display =
+        "none";
+
+    stopButton.style.display =
+        "block";
+
+
+    message.style.color =
+        "#007bff";
+
+    message.textContent =
+        "📷 Point the camera at the QR Code";
+
+
+    try{
+
+        scanner =
+            new Html5Qrcode("reader");
+
+
+        await scanner.start(
+
+            {
+                facingMode:
+                    "environment"
+            },
+
+            {
+                fps:10,
+
+                qrbox:{
+                    width:250,
+                    height:250
+                }
+
+            },
+
+            (decodedText)=>{
+
+                ticketInput.value =
+                    decodedText;
+
+
+                stopScanner();
+
+
+                verifyTicket(
+                    decodedText
+                );
+
+            },
+
+            (errorMessage)=>{
+
+                /* Ignore QR scanning errors */
+
+            }
+
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Scanner error:",
+            error
+        );
+
+
+        message.style.color =
+            "#dc3545";
+
+
+        message.textContent =
+            "Camera could not start: " +
+            error.message;
+
+
+        stopScanner();
+
+    }
+
+}
+
+
+/* STOP SCANNER */
+
+stopButton.addEventListener(
+    "click",
+    stopScanner
+);
+
+
+async function stopScanner(){
+
+    if(scanner){
+
+        try{
+
+            await scanner.stop();
+
+        }
+
+        catch(error){
+
+            console.log(error);
+
+        }
+
+
+        try{
+
+            scanner.clear();
+
+        }
+
+        catch(error){
+
+            console.log(error);
+
+        }
+
+
+        scanner = null;
+
+    }
+
+
+    reader.style.display =
+        "none";
+
+    stopButton.style.display =
+        "none";
+
+    scanButton.style.display =
+        "block";
+
+}
+
+</script>
+
+</body>
+</html>
