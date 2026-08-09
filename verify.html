@@ -185,10 +185,9 @@ placeholder="Example: TICKET-123456"
 import { db } from "./firebase-config.js";
 
 import {
-    collection,
-    getDocs,
-    updateDoc,
-    doc
+    doc,
+    getDoc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -217,14 +216,14 @@ const result =
     document.getElementById("result");
 
 
-let currentDocId = null;
+let currentTicketID = null;
 let currentTicket = null;
 let scanner = null;
 
 
 /*
 ==================================================
-GET TICKET ID FROM MANUAL INPUT
+EXTRACT TICKET ID
 ==================================================
 */
 
@@ -234,116 +233,12 @@ function extractTicketID(value){
         return "";
     }
 
-    value = String(value).trim();
-
-    /*
-    If the QR contains JSON
-    */
-
-    try{
-
-        const qrData = JSON.parse(value);
-
-        if(qrData && qrData.ticketID){
-
-            return String(qrData.ticketID)
-                .trim()
-                .toUpperCase();
-
-        }
-
-    }
-    catch(error){
-
-        // Not JSON, continue
-
-    }
+    value =
+        String(value).trim();
 
 
     /*
-    If QR contains a URL
-    */
-
-    try{
-
-        const url = new URL(value);
-
-        const ticketFromURL =
-            url.searchParams.get("ticket") ||
-            url.searchParams.get("ticketID") ||
-            url.searchParams.get("id");
-
-        if(ticketFromURL){
-
-            return ticketFromURL
-                .trim()
-                .toUpperCase();
-
-        }
-
-    }
-    catch(error){
-
-        // Not URL, continue
-
-    }
-
-
-    /*
-    If QR contains:
-    Ticket ID: TICKET-123456
-    */
-
-    const match =
-        value.match(
-            /TICKET[-_\s]?(?:ID)?\s*[:#=\-]?\s*([A-Z0-9_-]+)/i
-        );
-
-    if(match && match[1]){
-
-        return match[1]
-            .trim()
-            .toUpperCase();
-
-    }
-
-
-    /*
-    Otherwise assume it is already
-    the Ticket ID
-    */
-
-    return value
-        .trim()
-        .toUpperCase();
-
-}
-
-
-/*
-==================================================
-PARSE COMPLETE QR TICKET
-==================================================
-*/
-
-function parseQRData(value){
-
-    if(!value){
-        return null;
-    }
-
-    value = String(value).trim();
-
-
-    /*
-    IMPORTANT:
-
-    The booking system creates QR using:
-
-    JSON.stringify(ticket)
-
-    Therefore we first try to read
-    the complete ticket object.
+    QR contains JSON
     */
 
     try{
@@ -351,25 +246,69 @@ function parseQRData(value){
         const qrData =
             JSON.parse(value);
 
+
         if(
             qrData &&
-            typeof qrData === "object" &&
             qrData.ticketID
         ){
 
-            return qrData;
+            return String(
+                qrData.ticketID
+            )
+            .trim()
+            .toUpperCase();
 
         }
 
     }
+
     catch(error){
 
-        // QR is not JSON
+        // Not JSON
 
     }
 
 
-    return null;
+    /*
+    QR contains URL
+    */
+
+    try{
+
+        const url =
+            new URL(value);
+
+
+        const ticket =
+            url.searchParams.get("ticket") ||
+            url.searchParams.get("ticketID") ||
+            url.searchParams.get("id");
+
+
+        if(ticket){
+
+            return ticket
+                .trim()
+                .toUpperCase();
+
+        }
+
+    }
+
+    catch(error){
+
+        // Not URL
+
+    }
+
+
+    /*
+    Ticket ID directly
+    */
+
+    return value
+        .trim()
+        .toUpperCase();
 
 }
 
@@ -384,7 +323,9 @@ verifyButton.addEventListener(
     "click",
     function(){
 
-        verifyTicket(ticketInput.value);
+        verifyTicket(
+            ticketInput.value
+        );
 
     }
 );
@@ -402,7 +343,9 @@ ticketInput.addEventListener(
 
         if(e.key === "Enter"){
 
-            verifyTicket(ticketInput.value);
+            verifyTicket(
+                ticketInput.value
+            );
 
         }
 
@@ -418,12 +361,12 @@ VERIFY TICKET
 
 async function verifyTicket(value){
 
-    const ticketNumber =
+    const ticketID =
         extractTicketID(value);
 
 
     ticketInput.value =
-        ticketNumber;
+        ticketID;
 
 
     result.style.display =
@@ -435,14 +378,15 @@ async function verifyTicket(value){
     message.textContent =
         "";
 
-    currentDocId =
+
+    currentTicketID =
         null;
 
     currentTicket =
         null;
 
 
-    if(!ticketNumber){
+    if(!ticketID){
 
         message.style.color =
             "#dc3545";
@@ -464,57 +408,53 @@ async function verifyTicket(value){
 
     try{
 
-        const snapshot =
-            await getDocs(
-                collection(db,"bookings")
+        /*
+        IMPORTANT:
+
+        Ticket ID is now the
+        Firestore document ID.
+        */
+
+        const ticketRef =
+            doc(
+                db,
+                "bookings",
+                ticketID
             );
 
 
-        let found = null;
-        let foundDocId = null;
+        const ticketSnapshot =
+            await getDoc(
+                ticketRef
+            );
 
 
-        snapshot.forEach(
-            (documentSnapshot)=>{
+        if(
+            !ticketSnapshot.exists()
+        ){
 
-                const data =
-                    documentSnapshot.data();
-
-
-                if(
-                    data.ticketID &&
-                    String(data.ticketID)
-                        .trim()
-                        .toUpperCase()
-                        === ticketNumber
-                ){
-
-                    found =
-                        data;
-
-                    foundDocId =
-                        documentSnapshot.id;
-
-                }
-
-            }
-        );
-
-
-        if(!found){
-
-            showInvalid(ticketNumber);
+            showInvalid(
+                ticketID
+            );
 
         }
+
         else{
 
-            currentDocId =
-                foundDocId;
+            const data =
+                ticketSnapshot.data();
+
+
+            currentTicketID =
+                ticketID;
 
             currentTicket =
-                found;
+                data;
 
-            showTicket(found);
+
+            showTicket(
+                data
+            );
 
         }
 
@@ -523,15 +463,18 @@ async function verifyTicket(value){
     catch(error){
 
         console.error(
-            "Verification error:",
+            "Verification Error:",
             error
         );
+
 
         message.style.color =
             "#dc3545";
 
+
         message.textContent =
-            "Error: " + error.message;
+            "Verification failed: " +
+            error.message;
 
     }
 
@@ -547,7 +490,7 @@ async function verifyTicket(value){
 
 /*
 ==================================================
-SHOW COMPLETE TICKET
+SHOW TICKET
 ==================================================
 */
 
@@ -593,7 +536,9 @@ function showTicket(data){
         data.date || "N/A";
 
 
-    if(data.checkedIn === true){
+    if(
+        data.checkedIn === true
+    ){
 
         result.className =
             "result already";
@@ -613,6 +558,7 @@ function showTicket(data){
 
         message.style.color =
             "#856404";
+
 
         message.textContent =
             "This ticket has already been used.";
@@ -644,6 +590,7 @@ function showTicket(data){
         message.style.color =
             "#198754";
 
+
         message.textContent =
             "Ticket is valid and ready for check-in.";
 
@@ -658,14 +605,15 @@ function showTicket(data){
 
 /*
 ==================================================
-INVALID TICKET
+INVALID
 ==================================================
 */
 
-function showInvalid(ticketNumber){
+function showInvalid(ticketID){
 
     result.style.display =
         "block";
+
 
     result.className =
         "result invalid";
@@ -680,7 +628,7 @@ function showInvalid(ticketNumber){
     document.getElementById(
         "showTicket"
     ).textContent =
-        ticketNumber;
+        ticketID;
 
 
     document.getElementById(
@@ -739,13 +687,15 @@ checkInButton.addEventListener(
     "click",
     async function(){
 
-        if(!currentDocId){
+        if(!currentTicketID){
 
             message.style.color =
                 "#dc3545";
 
+
             message.textContent =
                 "Please verify a ticket first.";
+
 
             return;
 
@@ -755,22 +705,23 @@ checkInButton.addEventListener(
         checkInButton.disabled =
             true;
 
+
         checkInButton.textContent =
             "⏳ Checking In...";
 
 
         try{
 
-            const bookingRef =
+            const ticketRef =
                 doc(
                     db,
                     "bookings",
-                    currentDocId
+                    currentTicketID
                 );
 
 
             await updateDoc(
-                bookingRef,
+                ticketRef,
                 {
                     checkedIn:true,
 
@@ -784,15 +735,13 @@ checkInButton.addEventListener(
                 true;
 
 
+            currentTicket.checkInTime =
+                new Date().toLocaleString();
+
+
             showTicket(
                 currentTicket
             );
-
-
-            document.getElementById(
-                "showStatus"
-            ).textContent =
-                "Checked In ✅";
 
 
             message.style.color =
@@ -811,7 +760,7 @@ checkInButton.addEventListener(
         catch(error){
 
             console.error(
-                "Check-in error:",
+                "Check-in Error:",
                 error
             );
 
@@ -840,7 +789,7 @@ checkInButton.addEventListener(
 
 /*
 ==================================================
-START QR SCANNER
+START SCANNER
 ==================================================
 */
 
@@ -855,8 +804,10 @@ async function startScanner(){
     reader.style.display =
         "block";
 
+
     scanButton.style.display =
         "none";
+
 
     stopButton.style.display =
         "block";
@@ -865,6 +816,7 @@ async function startScanner(){
     message.style.color =
         "#007bff";
 
+
     message.textContent =
         "📷 Point the camera at the QR Code";
 
@@ -872,7 +824,9 @@ async function startScanner(){
     try{
 
         scanner =
-            new Html5Qrcode("reader");
+            new Html5Qrcode(
+                "reader"
+            );
 
 
         await scanner.start(
@@ -892,80 +846,48 @@ async function startScanner(){
 
             },
 
-            async (decodedText)=>{
+            async function(decodedText){
 
                 /*
-                STOP SCANNER FIRST
+                STOP CAMERA
                 */
 
                 await stopScanner();
 
 
                 /*
-                Check whether QR contains
-                the COMPLETE ticket JSON.
+                GET TICKET ID
                 */
 
-                const qrTicket =
-                    parseQRData(decodedText);
-
-
-                if(
-                    qrTicket &&
-                    qrTicket.ticketID
-                ){
-
-                    /*
-                    Show the Ticket ID
-                    */
-
-                    ticketInput.value =
-                        qrTicket.ticketID;
-
-
-                    /*
-                    IMPORTANT:
-
-                    We still verify against
-                    Firestore so the displayed
-                    information comes from
-                    the real booking record.
-                    */
-
-                    await verifyTicket(
-                        qrTicket.ticketID
+                const ticketID =
+                    extractTicketID(
+                        decodedText
                     );
 
-                }
 
-                else{
+                /*
+                PUT ID INTO INPUT
+                */
 
-                    /*
-                    QR only contains Ticket ID
-                    */
-
-                    const ticketID =
-                        extractTicketID(
-                            decodedText
-                        );
+                ticketInput.value =
+                    ticketID;
 
 
-                    ticketInput.value =
-                        ticketID;
+                /*
+                VERIFY FROM FIRESTORE
+                */
 
-
-                    await verifyTicket(
-                        ticketID
-                    );
-
-                }
+                await verifyTicket(
+                    ticketID
+                );
 
             },
 
-            (errorMessage)=>{
+            function(errorMessage){
 
                 /*
-                Ignore normal scanning errors
+                Ignore normal
+                scanner errors
                 */
 
             }
@@ -977,7 +899,7 @@ async function startScanner(){
     catch(error){
 
         console.error(
-            "Scanner error:",
+            "Scanner Error:",
             error
         );
 
@@ -1040,8 +962,7 @@ async function stopScanner(){
         }
 
 
-        scanner =
-            null;
+        scanner = null;
 
     }
 
@@ -1049,13 +970,14 @@ async function stopScanner(){
     reader.style.display =
         "none";
 
+
     stopButton.style.display =
         "none";
+
 
     scanButton.style.display =
         "block";
 
 }
 
-</script></body>
-</html>
+</script></body></html>
