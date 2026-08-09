@@ -242,8 +242,6 @@ Ticket Number
 
 <script type="module">
 
-/* USE THE SAME FIREBASE CONFIG THAT IS ALREADY WORKING */
-
 import { db } from "./firebase-config.js";
 
 import {
@@ -253,8 +251,6 @@ import {
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-/* ELEMENTS */
 
 const ticketInput =
     document.getElementById("ticketInput");
@@ -281,13 +277,94 @@ const result =
     document.getElementById("result");
 
 
-/* CURRENT TICKET */
-
 let currentDocId = null;
-
 let currentTicket = null;
-
 let scanner = null;
+
+
+/*
+GET TICKET ID FROM QR CONTENT
+
+This allows the QR code to contain:
+
+TICKET-123456
+
+or:
+
+https://rabilupau.github.io/event-ticketing-app/verify.html?ticket=TICKET-123456
+
+or another URL containing the ticket ID.
+*/
+
+function extractTicketID(value){
+
+    if(!value){
+        return "";
+    }
+
+    value = String(value).trim();
+
+    /*
+    If QR contains a URL
+    */
+
+    try{
+
+        const url = new URL(value);
+
+        const ticketFromURL =
+            url.searchParams.get("ticket") ||
+            url.searchParams.get("ticketID") ||
+            url.searchParams.get("id");
+
+        if(ticketFromURL){
+
+            return ticketFromURL
+                .trim()
+                .toUpperCase();
+
+        }
+
+    }
+    catch(error){
+
+        /*
+        Not a URL.
+        Continue normally.
+        */
+
+    }
+
+
+    /*
+    If QR contains text such as:
+
+    Ticket ID: TICKET-123456
+    */
+
+    const match =
+        value.match(
+            /TICKET[-_\s]?(?:ID)?\s*[:#=\-]?\s*([A-Z0-9_-]+)/i
+        );
+
+    if(match && match[1]){
+
+        return match[1]
+            .trim()
+            .toUpperCase();
+
+    }
+
+
+    /*
+    Otherwise use the scanned text directly.
+    */
+
+    return value
+        .trim()
+        .toUpperCase();
+
+}
 
 
 /* MANUAL VERIFY */
@@ -323,31 +400,40 @@ ticketInput.addEventListener(
 async function verifyTicket(value){
 
     const ticketNumber =
-        value.trim().toUpperCase();
+        extractTicketID(value);
 
-    result.style.display = "none";
 
-    checkInButton.style.display = "none";
+    ticketInput.value =
+        ticketNumber;
+
+
+    result.style.display =
+        "none";
+
+    checkInButton.style.display =
+        "none";
 
     message.textContent = "";
 
     currentDocId = null;
-
     currentTicket = null;
 
 
     if(!ticketNumber){
 
-        message.style.color = "#dc3545";
+        message.style.color =
+            "#dc3545";
 
         message.textContent =
             "Please enter a Ticket Number.";
 
         return;
+
     }
 
 
-    verifyButton.disabled = true;
+    verifyButton.disabled =
+        true;
 
     verifyButton.textContent =
         "⏳ Checking...";
@@ -362,7 +448,6 @@ async function verifyTicket(value){
 
 
         let found = null;
-
         let foundDocId = null;
 
 
@@ -372,9 +457,11 @@ async function verifyTicket(value){
                 const data =
                     documentSnapshot.data();
 
+
                 if(
                     data.ticketID &&
                     String(data.ticketID)
+                        .trim()
                         .toUpperCase()
                         === ticketNumber
                 ){
@@ -425,7 +512,8 @@ async function verifyTicket(value){
     }
 
 
-    verifyButton.disabled = false;
+    verifyButton.disabled =
+        false;
 
     verifyButton.textContent =
         "🔎 Verify Ticket";
@@ -433,7 +521,7 @@ async function verifyTicket(value){
 }
 
 
-/* SHOW VALID TICKET */
+/* SHOW TICKET */
 
 function showTicket(data){
 
@@ -498,7 +586,6 @@ function showTicket(data){
         message.style.color =
             "#856404";
 
-
         message.textContent =
             "This ticket has already been used.";
 
@@ -528,7 +615,6 @@ function showTicket(data){
 
         message.style.color =
             "#198754";
-
 
         message.textContent =
             "Ticket is valid and ready for check-in.";
@@ -763,22 +849,33 @@ async function startScanner(){
 
             (decodedText)=>{
 
+                /*
+                IMPORTANT:
+
+                Extract the actual Ticket ID
+                from whatever the QR contains.
+                */
+
+                const ticketID =
+                    extractTicketID(decodedText);
+
+
                 ticketInput.value =
-                    decodedText;
+                    ticketID;
 
 
                 stopScanner();
 
 
                 verifyTicket(
-                    decodedText
+                    ticketID
                 );
 
             },
 
             (errorMessage)=>{
 
-                /* Ignore QR scanning errors */
+                /* Ignore scanning errors */
 
             }
 
