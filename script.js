@@ -1,10 +1,9 @@
 import { db } from "./firebase-config.js";
 
 import {
-   collection,
-   addDoc
+doc,
+setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
 const form = document.getElementById("bookingForm");
 const message = document.getElementById("message");
@@ -12,108 +11,148 @@ const qrbox = document.getElementById("qrcode");
 const ticketBox = document.getElementById("ticket");
 const bookButton = document.getElementById("bookButton");
 
-
 form.addEventListener("submit", async function(e) {
 
-   e.preventDefault();
+e.preventDefault();
 
-   message.innerHTML = "⏳ Booking...";
+message.innerHTML = "⏳ Booking...";
 
-   bookButton.disabled = true;
+bookButton.disabled = true;
 
+/*
+CREATE UNIQUE TICKET ID
+*/
 
-   const ticketID =
-      "TICKET-" +
-      Math.floor(100000 + Math.random() * 900000);
+const ticketID =
+"TICKET-" +
+Math.floor(100000 + Math.random() * 900000);
 
+/*
+CREATE BOOKING DATA
+*/
 
-   const ticket = {
+const ticket = {
 
-      ticketID: ticketID,
+  ticketID: ticketID,
 
-      name: document.getElementById("name").value.trim(),
+  name:
+     document.getElementById("name").value.trim(),
 
-      email: document.getElementById("email").value.trim(),
+  email:
+     document.getElementById("email").value.trim(),
 
-      phone: document.getElementById("phone").value.trim(),
+  phone:
+     document.getElementById("phone").value.trim(),
 
-      event: document.getElementById("event").value,
+  event:
+     document.getElementById("event").value,
 
-      date: new Date().toLocaleString()
+  date:
+     new Date().toLocaleString(),
 
-   };
+  checkedIn: false,
 
+  checkInTime: ""
 
-   try {
+};
 
-      // Save booking to Firebase Firestore
-      await addDoc(
-         collection(db, "bookings"),
-         ticket
-      );
+try {
 
+  /*
+  SAVE BOOKING TO FIRESTORE
 
-      // Success message
-      message.innerHTML =
-         "✅ Booking Successful!";
+  Ticket ID is used as the document ID.
+  */
 
-
-      // Show ticket information
-      document.getElementById("ticketName").textContent =
-         ticket.name;
-
-      document.getElementById("ticketEmail").textContent =
-         ticket.email;
-
-      document.getElementById("ticketPhone").textContent =
-         ticket.phone;
-
-      document.getElementById("ticketEvent").textContent =
-         ticket.event;
-
-      document.getElementById("ticketNumber").textContent =
-         ticket.ticketID;
-
-      document.getElementById("ticketDate").textContent =
-         ticket.date;
+  await setDoc(
+     doc(db, "bookings", ticketID),
+     ticket
+  );
 
 
-      ticketBox.style.display = "block";
+  /*
+  SUCCESS MESSAGE
+  */
+
+  message.innerHTML =
+     "✅ Booking Successful!";
 
 
-      // Generate QR Code
-      qrbox.innerHTML = "";
+  /*
+  SHOW TICKET INFORMATION
+  */
 
-      new QRCode(qrbox, {
+  document.getElementById("ticketName").textContent =
+     ticket.name;
 
-         text: ticket.ticketID,
+  document.getElementById("ticketEmail").textContent =
+     ticket.email;
 
-         width: 180,
+  document.getElementById("ticketPhone").textContent =
+     ticket.phone;
 
-         height: 180
+  document.getElementById("ticketEvent").textContent =
+     ticket.event;
 
-      });
+  document.getElementById("ticketNumber").textContent =
+     ticket.ticketID;
+
+  document.getElementById("ticketDate").textContent =
+     ticket.date;
 
 
-      // Clear form
-      form.reset();
+  ticketBox.style.display =
+     "block";
 
-   }
 
-   catch (error) {
+  /*
+  GENERATE QR CODE
 
-      console.error("Booking Error:", error);
+  QR contains Ticket ID only.
+  */
 
-      message.innerHTML =
-         "❌ Booking failed: " + error.message;
+  qrbox.innerHTML = "";
 
-   }
 
-   finally {
+  new QRCode(
+     qrbox,
+     {
+        text: ticket.ticketID,
 
-      // Re-enable booking button
-      bookButton.disabled = false;
+        width: 180,
 
-   }
+        height: 180
+     }
+  );
+
+
+  /*
+  CLEAR BOOKING FORM
+  */
+
+  form.reset();
+
+}
+
+catch(error) {
+
+  console.error(
+     "Booking Error:",
+     error
+  );
+
+
+  message.innerHTML =
+     "❌ Booking failed: " +
+     error.message;
+
+}
+
+finally {
+
+  bookButton.disabled =
+     false;
+
+}
 
 });
