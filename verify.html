@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Ticket Verification & QR Scanner</title>
-
-<style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ticket Verification & QR Scanner</title><style>
 
 *{
     box-sizing:border-box;
@@ -147,100 +138,49 @@ button:disabled{
     border-radius:8px;
 }
 
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>🎟️ Ticket Verification</h1>
-
-<div class="subtitle">
+</style></head><body><div class="container"><h1>🎟️ Ticket Verification</h1><div class="subtitle">
 Verify ticket using Ticket Number or QR Code
-</div>
-
-<label for="ticketInput">
+</div><label for="ticketInput">
 Ticket Number
-</label>
+</label><input
+type="text"
+id="ticketInput"
+placeholder="Example: TICKET-123456"
 
-<input
-    type="text"
-    id="ticketInput"
-    placeholder="Example: TICKET-123456"
->
+«»
 
 <button id="verifyButton">
 🔎 Verify Ticket
-</button>
-
-<button id="scanButton">
+</button><button id="scanButton">
 📷 Scan QR Code
-</button>
-
-<button id="stopButton">
+</button><button id="stopButton">
 ⛔ Stop Scanner
-</button>
-
-<div id="reader"></div>
-
-<div id="message"></div>
-
-<div id="result" class="result">
-
-<h2 id="resultTitle"></h2>
-
-<div class="info">
+</button><div id="reader"></div><div id="message"></div><div id="result" class="result"><h2 id="resultTitle"></h2><div class="info">
 <strong>Ticket Number:</strong>
 <span id="showTicket"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Name:</strong>
 <span id="showName"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Email:</strong>
 <span id="showEmail"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Phone:</strong>
 <span id="showPhone"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Event:</strong>
 <span id="showEvent"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Date:</strong>
 <span id="showDate"></span>
-</div>
-
-<div class="info">
+</div><div class="info">
 <strong>Status:</strong>
 <span id="showStatus"></span>
-</div>
-
-</div>
-
-<button id="checkInButton">
+</div></div><button id="checkInButton">
 ✅ Check In
-</button>
-
-<a href="index.html" class="back">
+</button><a href="index.html" class="back">
 ← Back to Booking
-</a>
-
-</div>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-
-<script type="module">
+</a></div><script src="https://unpkg.com/html5-qrcode"></script><script type="module">
 
 import { db } from "./firebase-config.js";
 
@@ -283,17 +223,9 @@ let scanner = null;
 
 
 /*
-GET TICKET ID FROM QR CONTENT
-
-This allows the QR code to contain:
-
-TICKET-123456
-
-or:
-
-https://rabilupau.github.io/event-ticketing-app/verify.html?ticket=TICKET-123456
-
-or another URL containing the ticket ID.
+==================================================
+GET TICKET ID FROM MANUAL INPUT
+==================================================
 */
 
 function extractTicketID(value){
@@ -303,6 +235,30 @@ function extractTicketID(value){
     }
 
     value = String(value).trim();
+
+    /*
+    If the QR contains JSON
+    */
+
+    try{
+
+        const qrData = JSON.parse(value);
+
+        if(qrData && qrData.ticketID){
+
+            return String(qrData.ticketID)
+                .trim()
+                .toUpperCase();
+
+        }
+
+    }
+    catch(error){
+
+        // Not JSON, continue
+
+    }
+
 
     /*
     If QR contains a URL
@@ -328,17 +284,13 @@ function extractTicketID(value){
     }
     catch(error){
 
-        /*
-        Not a URL.
-        Continue normally.
-        */
+        // Not URL, continue
 
     }
 
 
     /*
-    If QR contains text such as:
-
+    If QR contains:
     Ticket ID: TICKET-123456
     */
 
@@ -357,7 +309,8 @@ function extractTicketID(value){
 
 
     /*
-    Otherwise use the scanned text directly.
+    Otherwise assume it is already
+    the Ticket ID
     */
 
     return value
@@ -367,7 +320,65 @@ function extractTicketID(value){
 }
 
 
-/* MANUAL VERIFY */
+/*
+==================================================
+PARSE COMPLETE QR TICKET
+==================================================
+*/
+
+function parseQRData(value){
+
+    if(!value){
+        return null;
+    }
+
+    value = String(value).trim();
+
+
+    /*
+    IMPORTANT:
+
+    The booking system creates QR using:
+
+    JSON.stringify(ticket)
+
+    Therefore we first try to read
+    the complete ticket object.
+    */
+
+    try{
+
+        const qrData =
+            JSON.parse(value);
+
+        if(
+            qrData &&
+            typeof qrData === "object" &&
+            qrData.ticketID
+        ){
+
+            return qrData;
+
+        }
+
+    }
+    catch(error){
+
+        // QR is not JSON
+
+    }
+
+
+    return null;
+
+}
+
+
+/*
+==================================================
+MANUAL VERIFY
+==================================================
+*/
 
 verifyButton.addEventListener(
     "click",
@@ -379,7 +390,11 @@ verifyButton.addEventListener(
 );
 
 
-/* ENTER KEY */
+/*
+==================================================
+ENTER KEY
+==================================================
+*/
 
 ticketInput.addEventListener(
     "keypress",
@@ -395,7 +410,11 @@ ticketInput.addEventListener(
 );
 
 
-/* VERIFY TICKET */
+/*
+==================================================
+VERIFY TICKET
+==================================================
+*/
 
 async function verifyTicket(value){
 
@@ -413,10 +432,14 @@ async function verifyTicket(value){
     checkInButton.style.display =
         "none";
 
-    message.textContent = "";
+    message.textContent =
+        "";
 
-    currentDocId = null;
-    currentTicket = null;
+    currentDocId =
+        null;
+
+    currentTicket =
+        null;
 
 
     if(!ticketNumber){
@@ -466,7 +489,8 @@ async function verifyTicket(value){
                         === ticketNumber
                 ){
 
-                    found = data;
+                    found =
+                        data;
 
                     foundDocId =
                         documentSnapshot.id;
@@ -521,7 +545,11 @@ async function verifyTicket(value){
 }
 
 
-/* SHOW TICKET */
+/*
+==================================================
+SHOW COMPLETE TICKET
+==================================================
+*/
 
 function showTicket(data){
 
@@ -532,37 +560,37 @@ function showTicket(data){
     document.getElementById(
         "showTicket"
     ).textContent =
-        data.ticketID || "";
+        data.ticketID || "N/A";
 
 
     document.getElementById(
         "showName"
     ).textContent =
-        data.name || "";
+        data.name || "N/A";
 
 
     document.getElementById(
         "showEmail"
     ).textContent =
-        data.email || "";
+        data.email || "N/A";
 
 
     document.getElementById(
         "showPhone"
     ).textContent =
-        data.phone || "";
+        data.phone || "N/A";
 
 
     document.getElementById(
         "showEvent"
     ).textContent =
-        data.event || "";
+        data.event || "N/A";
 
 
     document.getElementById(
         "showDate"
     ).textContent =
-        data.date || "";
+        data.date || "N/A";
 
 
     if(data.checkedIn === true){
@@ -628,7 +656,11 @@ function showTicket(data){
 }
 
 
-/* INVALID TICKET */
+/*
+==================================================
+INVALID TICKET
+==================================================
+*/
 
 function showInvalid(ticketNumber){
 
@@ -653,27 +685,32 @@ function showInvalid(ticketNumber){
 
     document.getElementById(
         "showName"
-    ).textContent = "";
+    ).textContent =
+        "";
 
 
     document.getElementById(
         "showEmail"
-    ).textContent = "";
+    ).textContent =
+        "";
 
 
     document.getElementById(
         "showPhone"
-    ).textContent = "";
+    ).textContent =
+        "";
 
 
     document.getElementById(
         "showEvent"
-    ).textContent = "";
+    ).textContent =
+        "";
 
 
     document.getElementById(
         "showDate"
-    ).textContent = "";
+    ).textContent =
+        "";
 
 
     document.getElementById(
@@ -692,7 +729,11 @@ function showInvalid(ticketNumber){
 }
 
 
-/* CHECK IN */
+/*
+==================================================
+CHECK IN
+==================================================
+*/
 
 checkInButton.addEventListener(
     "click",
@@ -731,7 +772,7 @@ checkInButton.addEventListener(
             await updateDoc(
                 bookingRef,
                 {
-                    checkedIn: true,
+                    checkedIn:true,
 
                     checkInTime:
                         new Date().toLocaleString()
@@ -797,7 +838,11 @@ checkInButton.addEventListener(
 );
 
 
-/* START QR SCANNER */
+/*
+==================================================
+START QR SCANNER
+==================================================
+*/
 
 scanButton.addEventListener(
     "click",
@@ -847,35 +892,81 @@ async function startScanner(){
 
             },
 
-            (decodedText)=>{
+            async (decodedText)=>{
 
                 /*
-                IMPORTANT:
-
-                Extract the actual Ticket ID
-                from whatever the QR contains.
+                STOP SCANNER FIRST
                 */
 
-                const ticketID =
-                    extractTicketID(decodedText);
+                await stopScanner();
 
 
-                ticketInput.value =
-                    ticketID;
+                /*
+                Check whether QR contains
+                the COMPLETE ticket JSON.
+                */
+
+                const qrTicket =
+                    parseQRData(decodedText);
 
 
-                stopScanner();
+                if(
+                    qrTicket &&
+                    qrTicket.ticketID
+                ){
+
+                    /*
+                    Show the Ticket ID
+                    */
+
+                    ticketInput.value =
+                        qrTicket.ticketID;
 
 
-                verifyTicket(
-                    ticketID
-                );
+                    /*
+                    IMPORTANT:
+
+                    We still verify against
+                    Firestore so the displayed
+                    information comes from
+                    the real booking record.
+                    */
+
+                    await verifyTicket(
+                        qrTicket.ticketID
+                    );
+
+                }
+
+                else{
+
+                    /*
+                    QR only contains Ticket ID
+                    */
+
+                    const ticketID =
+                        extractTicketID(
+                            decodedText
+                        );
+
+
+                    ticketInput.value =
+                        ticketID;
+
+
+                    await verifyTicket(
+                        ticketID
+                    );
+
+                }
 
             },
 
             (errorMessage)=>{
 
-                /* Ignore scanning errors */
+                /*
+                Ignore normal scanning errors
+                */
 
             }
 
@@ -900,14 +991,18 @@ async function startScanner(){
             error.message;
 
 
-        stopScanner();
+        await stopScanner();
 
     }
 
 }
 
 
-/* STOP SCANNER */
+/*
+==================================================
+STOP SCANNER
+==================================================
+*/
 
 stopButton.addEventListener(
     "click",
@@ -945,7 +1040,8 @@ async function stopScanner(){
         }
 
 
-        scanner = null;
+        scanner =
+            null;
 
     }
 
@@ -961,7 +1057,5 @@ async function stopScanner(){
 
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
