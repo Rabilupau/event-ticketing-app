@@ -1,81 +1,412 @@
-body{
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 15px;
     font-family: Arial, sans-serif;
-    background:#f2f2f2;
-    text-align:center;
-    margin:0;
-    padding:20px;
+    background: #f2f2f2;
+    color: #222;
+    text-align: center;
 }
 
-
-h1{
-    color:green;
+/* Main container */
+.container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
 }
 
-
-.container{
-
-    background:white;
-    max-width:400px;
-    margin:auto;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px gray;
-
+/* Headings */
+h1,
+h2,
+h3 {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-
-input, select, button{
-
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    font-size:16px;
-    box-sizing:border-box;
-
+/* Paragraphs */
+p {
+    text-align: center;
 }
 
-
-button{
-
-    background:green;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-
+.small {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
 }
 
-
-button:hover{
-
-    background:darkgreen;
-
+/* Inputs */
+input,
+textarea,
+select {
+    display: block;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: center;
+    background: white;
 }
 
-
-#message{
-
-    margin-top:15px;
-    font-weight:bold;
-
+textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
-
-#ticket{
-
-    margin-top:20px;
-    text-align:left;
-    background:#eee;
-    padding:15px;
-    border-radius:8px;
-
+/* Labels */
+label {
+    display: block;
+    text-align: center;
+    margin: 12px auto 5px;
 }
 
+/* Buttons */
+button {
+    display: inline-block;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin: 8px 4px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.2s;
+}
 
-#qrcode{
+button:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
 
-    margin:20px auto;
-    display:flex;
-    justify-content:center;
+/* Button colors */
+.green {
+    background: #28a745;
+    color: white;
+}
 
+.red {
+    background: #dc3545;
+    color: white;
+}
+
+.blue {
+    background: #007bff;
+    color: white;
+}
+
+.gray {
+    background: #6c757d;
+    color: white;
+}
+
+/* Flex sections */
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    width: 100%;
+    text-align: center;
+}
+
+/* Override inline flex:2 / flex:1 */
+.flex > div {
+    flex: unset !important;
+    width: 100%;
+    text-align: center;
+}
+
+/* Login */
+#loginPage {
+    width: 100%;
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+#loginPage h2,
+#loginPage p {
+    text-align: center;
+}
+
+#loginPage input {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#loginPage button {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#loginMessage {
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Dashboard */
+#dashboardPage {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Dashboard header */
+#dashboardPage .flex:first-child {
+    justify-content: center;
+    text-align: center;
+}
+
+/* Statistics */
+.stat {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    vertical-align: top;
+    width: 220px;
+    min-height: 100px;
+    margin: 10px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 28px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Ticket Verification */
+#ticketIdInput {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#reader {
+    width: 100%;
+    max-width: 500px;
+    margin: 15px auto;
+    text-align: center;
+}
+
+#verifyResult {
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto;
+    text-align: center;
+}
+
+/* Add Event */
+#eventName,
+#eventDate,
+#eventDescription,
+#eventImage {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#eventImage {
+    padding: 8px;
+}
+
+/* Image preview */
+.preview {
+    display: block;
+    max-width: 300px;
+    max-height: 250px;
+    margin: 15px auto;
+    border-radius: 10px;
+    object-fit: contain;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Event grid */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(250px, 1fr)
+    );
+    gap: 15px;
+    width: 100%;
+    max-width: 950px;
+    margin: 20px auto;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Event cards */
+.event-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* Event images */
+.event-card img {
+    display: block;
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    margin: 0 auto 15px;
+    border-radius: 10px;
+}
+
+/* Event statistics */
+#eventStatistics {
+    width: 100%;
+    max-width: 950px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+/* Statistics cards */
+#eventStatistics > div {
+    background: white;
+    padding: 20px;
+    margin: 15px auto;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* Search */
+#searchInput {
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto;
+    text-align: center;
+}
+
+/* Bookings */
+#bookingsList {
+    width: 100%;
+    max-width: 950px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+/* Booking cards */
+.booking-card {
+    background: white;
+    padding: 18px;
+    margin: 15px auto;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* Tables if your bookings use table */
+table {
+    width: 100%;
+    max-width: 950px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: white;
+    text-align: center;
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #f5f5f5;
+}
+
+/* Horizontal lines */
+hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 25px auto;
+    width: 90%;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .container,
+    #dashboardPage {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 21px;
+    }
+
+    h3 {
+        font-size: 18px;
+    }
+
+    .stat {
+        display: flex;
+        width: 100%;
+        max-width: 350px;
+        margin: 10px auto;
+    }
+
+    button {
+        width: auto;
+        min-width: 140px;
+    }
+
+    .flex {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .flex > div {
+        width: 100%;
+    }
+
+    .event-grid {
+        grid-template-columns: 1fr;
+    }
+
+    input,
+    textarea,
+    select {
+        max-width: 100%;
+    }
+
+    table {
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
