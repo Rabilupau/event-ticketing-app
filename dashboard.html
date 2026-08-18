@@ -592,42 +592,78 @@ hr{
 
 <div class="container">
 
+/* =====================================================
+   ADMIN LOGIN
+===================================================== */
 
-<!-- =====================================================
-     LOGIN
-===================================================== -->
+const ADMIN_USERNAME =
+    "Rabilupau";
 
-<div id="loginPage" class="login-box card">
+const ADMIN_PASSWORD =
+    "Rabilu@123";
 
-    <h2>
-        🔐 Admin Login
-    </h2>
 
-    <p class="small">
-        Login to access the Event Ticketing Admin Dashboard.
-    </p>
+function login(){
 
-    <input
-        type="text"
-        id="username"
-        placeholder="Username"
-        autocomplete="username"
-    >
+    const username =
+        document
+        .getElementById("username")
+        .value
+        .trim();
 
-    <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        autocomplete="current-password"
-    >
 
-    <button onclick="login()">
-        🔐 Login
-    </button>
+    const password =
+        document
+        .getElementById("password")
+        .value;
 
-    <p id="loginMessage"></p>
 
-</div>
+    const message =
+        document.getElementById(
+            "loginMessage"
+        );
+
+
+    if(
+        username === ADMIN_USERNAME &&
+        password === ADMIN_PASSWORD
+    ){
+
+        localStorage.setItem(
+            "eventAdminLoggedIn",
+            "true"
+        );
+
+
+        document
+        .getElementById("loginPage")
+        .classList
+        .add("hidden");
+
+
+        document
+        .getElementById("dashboardPage")
+        .classList
+        .remove("hidden");
+
+
+        loadBookings();
+
+        loadEvents();
+
+    }else{
+
+        message.textContent =
+            "❌ Wrong username or password.";
+
+        message.style.color =
+            "red";
+
+    }
+
+}
+
+
 
 
 <!-- =====================================================
