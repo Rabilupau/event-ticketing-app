@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Dashboard | Event Ticketing</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f6f8;
+      color: #222;
+    }
+    header {
+      background: #075e54;
+      color: white;
+      padding: 20px;
+    }
+    header h2 { margin: 0 0 6px; }
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 15px;
+    }
+    .card {
+      background: white;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px #00000010;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      background: #e8f4f1;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 25px;
+      color: #075e54;
+      margin-top: 8px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0;
+      border-radius: 7px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    button {
+      background: #075e54;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .logout { background: #b3261e; max-width: 130px; }
+    .event {
+      border: 1px solid #ddd;
+      padding: 13px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .muted { color: #666; font-size: 14px; }
+    #message { font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Organizer Dashboard</h2>
+  <div>Manage your events and registrations</div>
+</header>
+
+<main>
+  <section class="card">
+    <h3>Organizer Information</h3>
+    <p id="organizerName">Loading...</p>
+    <p id="organizerEmail"></p>
+    <p id="accountStatus" class="muted"></p>
+    <button id="logoutButton" class="logout">Logout</button>
+  </section>
+
+  <section class="card">
+    <h3>Participant Capacity</h3>
+    <div class="stats">
+      <div class="stat">
+        Purchased
+        <strong id="purchasedCapacity">0</strong>
+      </div>
+      <div class="stat">
+        Used
+        <strong id="usedCapacity">0</strong>
+      </div>
+      <div class="stat">
+        Remaining
+        <strong id="remainingCapacity">0</strong>
+      </div>
+    </div>
+    <p class="muted">
+      Your participant capacity will increase after a verified capacity purchase.
+    </p>
+  </section>
+
+  <section class="card">
+    <h3>Create New Event</h3>
+    <p class="muted">Fill in the details of your event.</p>
+
+    <form id="eventForm">
+      <input id="eventName" type="text" placeholder="Event Name" required>
+
+      <textarea id="eventDescription" placeholder="Event Description" required></textarea>
+
+      <input id="organ
