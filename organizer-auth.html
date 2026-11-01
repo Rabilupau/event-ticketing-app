@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizer Account | Event Ticketing</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+    color:#222;
+}
+
+.container{
+    max-width:450px;
+    margin:35px auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 3px 15px rgba(0,0,0,.1);
+}
+
+h1,h2,p{text-align:center}
+
+h1{font-size:25px}
+
+input,button{
+    display:block;
+    width:100%;
+    padding:14px;
+    margin:12px 0;
+    border-radius:8px;
+    font-size:16px;
+}
+
+input{
+    border:1px solid #ccc;
+}
+
+button{
+    border:0;
+    background:#16803c;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:disabled{
+    background:#888;
+}
+
+.switch{
+    background:#1769aa;
+}
+
+#message{
+    text-align:center;
+    padding:10px;
+    line-height:1.5;
+    overflow-wrap:anywhere;
+}
+
+.small{
+    font-size:13px;
+    color:#666;
+}
+
+.hidden{display:none!important}
+
+.success{color:green}
+.error{color:red}
+
+a{
+    color:#1769aa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎟️ Event Ticketing</h1>
+
+<h2 id="formTitle">Create Organizer Account</h2>
+
+<p class="small">
+Create your free account to manage your events and participants.
+</p>
+
+<div id="registerFields">
+
+<input
+type="text"
+id="organizerName"
+placeholder="Full Name"
+autocomplete="name"
+>
+
+<input
+type="tel"
+id="organizerPhone"
+placeholder="Phone Number"
+autocomplete="tel"
+>
+
+</div>
+
+<input
+type="email"
+id="organizerEmail"
+placeholder="Email Address"
+autocomplete="email"
+>
+
+<input
+type="password"
+id="organizerPassword"
+placeholder="Password (minimum 8 characters)"
+autocomplete="new-password"
+>
+
+<button id="submitButton" onclick="submitForm()">
+Create Account
+</button>
+
+<button
+id="switchButton"
+class="switch"
+onclick="switchForm()"
+>
+Already have an account? Login
+</button>
+
+<p id="message"></p>
+
+<p class="small">
+By creating an account, you agree to use the platform responsibly.
+</p>
+
+</div>
+
+<script type="module" src="organizer-auth.js"></script>
+
+</body>
+</html>
