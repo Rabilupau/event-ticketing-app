@@ -1,1586 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Ticketing Admin Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script src="https://unpkg.com/html5-qrcode"
-type="text/javascript"></script>
-
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-
-/* =====================================================
-   GENERAL
-===================================================== */
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    padding:15px;
-    font-family:Arial,sans-serif;
-    background:#f2f2f2;
-    color:#222;
-    text-align:center;
-}
-
-.container{
-    width:100%;
-    max-width:1100px;
-    margin:0 auto;
-    text-align:center;
-}
-
-
-/* =====================================================
-   CARDS
-===================================================== */
-
-.card{
-    background:#fff;
-    border-radius:12px;
-    padding:18px;
-    margin-bottom:18px;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
-    text-align:center;
-}
-
-
-/* =====================================================
-   LOGIN
-===================================================== */
-
-.login-box{
-    width:100%;
-    max-width:420px;
-    margin:60px auto;
-    text-align:center;
-}
-
-
-/* =====================================================
-   HEADINGS
-===================================================== */
-
-h1,
-h2,
-h3{
-    margin-top:0;
-    text-align:center;
-}
-
-
-/* =====================================================
-   TEXT
-===================================================== */
-
-p{
-    text-align:center;
-}
-
-.small{
-    font-size:13px;
-    color:#666;
-    text-align:center;
-}
-
-
-/* =====================================================
-   INPUTS
-===================================================== */
-
-input,
-select,
-textarea,
-button{
-    width:100%;
-    max-width:500px;
-    padding:12px;
-    margin:6px auto;
-    border-radius:8px;
-    border:1px solid #ccc;
-    font-size:15px;
-    display:block;
-    text-align:center;
-}
-
-textarea{
-    min-height:90px;
-    resize:vertical;
-}
-
-
-/* =====================================================
-   BUTTONS
-===================================================== */
-
-button{
-    border:0;
-    background:#111;
-    color:#fff;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-button:hover{
-    opacity:.9;
-}
-
-
-/* =====================================================
-   BUTTON COLORS
-===================================================== */
-
-.green{
-    background:#16803c;
-    color:#fff;
-}
-
-.red{
-    background:#c62828;
-    color:#fff;
-}
-
-.blue{
-    background:#1769aa;
-    color:#fff;
-}
-
-.orange{
-    background:#e67e22;
-    color:#fff;
-}
-
-.gray{
-    background:#555;
-    color:#fff;
-}
-
-
-/* =====================================================
-   HIDDEN
-===================================================== */
-
-.hidden{
-    display:none !important;
-}
-
-
-/* =====================================================
-   DASHBOARD HEADER
-===================================================== */
-
-.dashboard-header{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    width:100%;
-    text-align:center;
-}
-
-.dashboard-header h1{
-    width:100%;
-    text-align:center;
-}
-
-.dashboard-header p{
-    width:100%;
-    text-align:center;
-}
-
-.dashboard-header button{
-    width:auto;
-    min-width:150px;
-}
-
-
-/* =====================================================
-   FLEX
-===================================================== */
-
-.flex{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-    width:100%;
-    text-align:center;
-}
-
-.flex > div{
-    flex:unset !important;
-    width:100%;
-    text-align:center;
-}
-
-.flex button{
-    flex:1;
-    min-width:130px;
-    max-width:300px;
-}
-
-
-/* =====================================================
-   GENERAL STATS
-===================================================== */
-
-.stats{
-    display:grid;
-    grid-template-columns:
-        repeat(auto-fit,minmax(180px,1fr));
-
-    gap:12px;
-    margin-bottom:18px;
-    text-align:center;
-}
-
-.stat{
-    background:#fff;
-    padding:18px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.07);
-    text-align:center;
-}
-
-.stat strong{
-    display:block;
-    font-size:28px;
-    margin-top:8px;
-    text-align:center;
-}
-
-
-/* =====================================================
-   EVENTS
-===================================================== */
-
-.event-grid{
-    display:grid;
-    grid-template-columns:
-        repeat(auto-fit,minmax(250px,1fr));
-
-    gap:15px;
-    justify-content:center;
-    text-align:center;
-}
-
-.event-card{
-    border:1px solid #ddd;
-    border-radius:10px;
-    padding:14px;
-    background:#fff;
-    text-align:center;
-}
-
-.event-card img{
-    width:100%;
-    max-height:180px;
-    object-fit:cover;
-    border-radius:8px;
-    display:block;
-    margin:auto;
-}
-
-.event-card h3,
-.event-card p{
-    text-align:center;
-}
-
-
-/* =====================================================
-   BOOKINGS
-===================================================== */
-
-.booking{
-    border:1px solid #ddd;
-    border-radius:10px;
-    padding:12px;
-    margin:10px auto;
-    background:#fafafa;
-    text-align:center;
-    max-width:700px;
-}
-
-.booking p{
-    text-align:center;
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-.status{
-    display:inline-block;
-    padding:5px 9px;
-    border-radius:15px;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.checked{
-    background:#c8f7d5;
-    color:#126b2f;
-}
-
-.notchecked{
-    background:#ffe0e0;
-    color:#a00000;
-}
-
-
-/* =====================================================
-   EVENT IMAGE PREVIEW
-===================================================== */
-
-.preview{
-    width:100%;
-    max-width:400px;
-    max-height:220px;
-    object-fit:cover;
-    border-radius:10px;
-    margin:8px auto;
-    display:block;
-}
-
-
-/* =====================================================
-   VERIFY RESULT
-===================================================== */
-
-.verify-result{
-    width:100%;
-    max-width:600px;
-    padding:15px;
-    border-radius:10px;
-    margin:12px auto;
-    text-align:center;
-}
-
-.success{
-    background:#d9f8df;
-    color:#146c2e;
-}
-
-.error{
-    background:#ffe0e0;
-    color:#9b0000;
-}
-
-.warning{
-    background:#fff0c9;
-    color:#765500;
-}
-
-
-/* =====================================================
-   LOADING / EMPTY
-===================================================== */
-
-.loading{
-    text-align:center;
-    padding:20px;
-    color:#1769aa;
-    font-weight:bold;
-}
-
-.empty{
-    text-align:center;
-    padding:20px;
-    color:#777;
-}
-
-
-/* =====================================================
-   HR
-===================================================== */
-
-hr{
-    border:0;
-    border-top:1px solid #ddd;
-    margin:18px auto;
-    width:90%;
-}
-
-
-/* =====================================================
-   QR READER
-===================================================== */
-
-#reader{
-    width:100%;
-    max-width:500px;
-    margin:15px auto;
-    text-align:center;
-}
-
-
-/* =====================================================
-   FIREBASE ERROR
-===================================================== */
-
-.firebase-error{
-    background:#ffe0e0;
-    color:#900;
-    padding:12px;
-    border-radius:8px;
-    margin:10px auto;
-    text-align:center;
-}
-
-
-/* =====================================================
-   DELETE BOOKING
-===================================================== */
-
-.delete-booking{
-    margin-top:10px;
-}
-
-
-/* =====================================================
-   EVENT STATISTICS
-===================================================== */
-
-#eventStatistics{
-    width:100%;
-    text-align:center;
-}
-
-#eventStatistics .event-card{
-    max-width:700px;
-    margin:15px auto;
-}
-
-.event-stat-names{
-    margin:8px auto;
-    padding-left:0;
-    list-style-position:inside;
-    text-align:center;
-}
-
-.event-stat-names li{
-    margin:5px 0;
-    text-align:center;
-}
-
-
-/* =====================================================
-   LOGIN MESSAGE
-===================================================== */
-
-#loginMessage{
-    text-align:center;
-    font-weight:bold;
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
+*{box-sizing:border-box}
+body{margin:0;padding:15px;font-family:Arial,sans-serif;background:#f2f2f2;color:#222;text-align:center}
+.container{width:100%;max-width:1100px;margin:auto}
+.card,.stat{background:#fff;border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.login-box{width:100%;max-width:420px;margin:60px auto}
+h1,h2,h3,p{text-align:center}
+.small{font-size:13px;color:#666}
+input,select,textarea,button{width:100%;max-width:500px;padding:12px;margin:6px auto;border-radius:8px;border:1px solid #ccc;font-size:15px;display:block;text-align:center}
+textarea{min-height:90px;resize:vertical}
+button{border:0;background:#111;color:#fff;cursor:pointer;font-weight:bold}
+button:hover{opacity:.9}
+.green{background:#16803c;color:white}
+.red{background:#c62828;color:white}
+.blue{background:#1769aa;color:white}
+.gray{background:#555;color:white}
+.hidden{display:none!important}
+.dashboard-header{display:flex;align-items:center;flex-direction:column}
+.dashboard-header button{width:auto;min-width:150px}
+.flex{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
+.flex button{flex:1;min-width:130px;max-width:300px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.stat strong{display:block;font-size:28px;margin-top:8px}
+.event-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}
+.event-card{border:1px solid #ddd;border-radius:10px;padding:14px;background:#fff}
+.event-card img{width:100%;max-height:180px;object-fit:cover;border-radius:8px}
+.booking{border:1px solid #ddd;border-radius:10px;padding:12px;margin:10px auto;background:#fafafa;max-width:700px}
+.status{display:inline-block;padding:5px 9px;border-radius:15px;font-size:12px;font-weight:bold}
+.checked{background:#c8f7d5;color:#126b2f}
+.notchecked{background:#ffe0e0;color:#a00000}
+.preview{width:100%;max-width:400px;max-height:220px;object-fit:cover;border-radius:10px;margin:8px auto;display:block}
+.verify-result{max-width:600px;padding:15px;border-radius:10px;margin:12px auto}
+.success{background:#d9f8df;color:#146c2e}
+.error{background:#ffe0e0;color:#9b0000}
+.warning{background:#fff0c9;color:#765500}
+.loading{padding:20px;color:#1769aa;font-weight:bold}
+.empty{padding:20px;color:#777}
+.firebase-error{background:#ffe0e0;color:#900;padding:12px;border-radius:8px;margin:10px auto}
+#reader{width:100%;max-width:500px;margin:15px auto}
+.event-stat-names{padding-left:0;list-style-position:inside}
+hr{border:0;border-top:1px solid #ddd;margin:18px auto;width:90%}
 @media(max-width:600px){
-
-    body{
-        padding:8px;
-    }
-
-    .card{
-        padding:13px;
-    }
-
-    h1{
-        font-size:24px;
-    }
-
-    h2{
-        font-size:21px;
-    }
-
-    h3{
-        font-size:18px;
-    }
-
-    .stats{
-        grid-template-columns:1fr;
-    }
-
-    .stat{
-        width:100%;
-    }
-
-    .flex{
-        flex-direction:column;
-    }
-
-    .flex > div{
-        width:100%;
-    }
-
-    .flex button{
-        width:100%;
-        max-width:100%;
-    }
-
-    input,
-    select,
-    textarea{
-        max-width:100%;
-    }
-
-    button{
-        max-width:100%;
-    }
-
-    .event-grid{
-        grid-template-columns:1fr;
-    }
-
+body{padding:8px}
+.card{padding:13px}
+h1{font-size:24px}
+.stats{grid-template-columns:1fr}
+.flex{flex-direction:column}
+.flex button,button,input,select,textarea{max-width:100%}
+.event-grid{grid-template-columns:1fr}
 }
-
-
-/* =====================================================
-   EXTRA MOBILE CENTERING
-===================================================== */
-
-@media(max-width:400px){
-
-    body{
-        padding:5px;
-    }
-
-    .card{
-        padding:12px;
-    }
-
-    h1{
-        font-size:21px;
-    }
-
-    h2{
-        font-size:19px;
-    }
-
-    .stat strong{
-        font-size:25px;
-    }
-
-}
-
 </style>
-
 </head>
 
-
 <body>
-
-
 <div class="container">
 
-
-<!-- =====================================================
-     LOGIN
-===================================================== -->
-
+<!-- LOGIN STATUS -->
 <div id="loginPage" class="login-box card">
-
-    <h2>
-        🔐 Admin Login
-    </h2>
-
-    <p class="small">
-        Login to access the Event Ticketing Admin Dashboard.
-    </p>
-
-    <input
-        type="text"
-        id="username"
-        placeholder="Username"
-        autocomplete="username"
-    >
-
-    <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        autocomplete="current-password"
-    >
-
-    <button onclick="login()">
-        🔐 Login
-    </button>
-
-    <p id="loginMessage"></p>
-
+<h2>🔐 Admin Authentication</h2>
+<p class="small">Checking administrator access...</p>
+<p id="loginMessage">Please wait while Firebase verifies your account.</p>
+<button class="blue" onclick="goToLoginPage()">Open Login Page</button>
 </div>
 
-
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
-
+<!-- DASHBOARD -->
 <div id="dashboardPage" class="hidden">
 
-
-<!-- HEADER -->
-
 <div class="card">
-
-    <div class="dashboard-header">
-
-        <h1>
-            🎟️ Event Ticketing Admin Dashboard
-        </h1>
-
-        <p class="small">
-            Manage events, bookings, verification and check-in.
-        </p>
-
-        <button
-            class="red"
-            onclick="logout()"
-        >
-            🚪 Logout
-        </button>
-
-    </div>
-
+<div class="dashboard-header">
+<h1>🎟️ Event Ticketing Admin Dashboard</h1>
+<p class="small">Manage events, bookings, verification and check-in.</p>
+<p class="small" id="adminEmail"></p>
+<button class="red" onclick="logout()">🚪 Logout</button>
+</div>
 </div>
 
-
-<!-- =====================================================
-     GENERAL STATS
-===================================================== -->
-
+<!-- GENERAL STATISTICS -->
 <div class="stats">
-
-    <div class="stat">
-
-        📊 Total Bookings
-
-        <strong id="totalBookings">
-            0
-        </strong>
-
-    </div>
-
-
-    <div class="stat">
-
-        🎫 Total Tickets
-
-        <strong id="totalTickets">
-            0
-        </strong>
-
-    </div>
-
-
-    <div class="stat">
-
-        ✅ Checked-in
-
-        <strong id="checkedIn">
-            0
-        </strong>
-
-    </div>
-
-
-    <div class="stat">
-
-        ❌ Not Checked-in
-
-        <strong id="notCheckedIn">
-            0
-        </strong>
-
-    </div>
-
+<div class="stat">📊 Total Bookings<strong id="totalBookings">0</strong></div>
+<div class="stat">🎫 Total Tickets<strong id="totalTickets">0</strong></div>
+<div class="stat">✅ Checked-in<strong id="checkedIn">0</strong></div>
+<div class="stat">❌ Not Checked-in<strong id="notCheckedIn">0</strong></div>
 </div>
 
-
-<!-- =====================================================
-     TICKET VERIFICATION
-===================================================== -->
-
+<!-- TICKET VERIFICATION -->
 <div class="card">
+<h2>🎟️ Ticket Verification</h2>
+<p class="small">Verify a ticket using Ticket ID or QR Code.</p>
 
-    <h2>
-        🎟️ Ticket Verification
-    </h2>
+<input type="text" id="ticketIdInput" placeholder="Enter Ticket ID">
 
-    <p class="small">
-        Verify a ticket using Ticket ID or QR Code.
-    </p>
+<button class="blue" onclick="verifyTicketByID()">🔎 Verify Ticket ID</button>
 
+<hr>
 
-    <input
-        type="text"
-        id="ticketIdInput"
-        placeholder="Enter Ticket ID"
-    >
+<h3>📷 QR Code Scanner</h3>
+<div id="reader"></div>
 
+<button class="green" onclick="startScanner()">📷 Start QR Scanner</button>
+<button class="gray" onclick="stopScanner()">⏹ Stop Scanner</button>
 
-    <button
-        class="blue"
-        onclick="verifyTicketByID()"
-    >
-        🔎 Verify Ticket ID
-    </button>
+<hr>
 
+<h3>🖼️ Verify QR Code From Gallery</h3>
+<input type="file" id="qrGallery" accept="image/*" onchange="scanGallery(event)">
 
-    <hr>
-
-
-    <h3>
-        📷 QR Code Scanner
-    </h3>
-
-
-    <div id="reader"></div>
-
-
-    <button
-        class="green"
-        onclick="startScanner()"
-    >
-        📷 Start QR Scanner
-    </button>
-
-
-    <button
-        class="gray"
-        onclick="stopScanner()"
-    >
-        ⏹ Stop Scanner
-    </button>
-
-
-    <hr>
-
-
-    <h3>
-        🖼️ Verify QR Code From Gallery
-    </h3>
-
-
-    <input
-        type="file"
-        id="qrGallery"
-        accept="image/*"
-        onchange="scanGallery(event)"
-    >
-
-
-    <div id="verifyResult"></div>
-
+<div id="verifyResult"></div>
 </div>
 
-
-<!-- =====================================================
-     ADD NEW EVENT
-===================================================== -->
-
+<!-- ADD EVENT -->
 <div class="card">
+<h2>➕ Add New Event</h2>
 
-    <h2>
-        ➕ Add New Event
-    </h2>
+<input type="text" id="eventName" placeholder="Event Name">
+<input type="date" id="eventDate">
 
+<textarea id="eventDescription" placeholder="Event Description"></textarea>
 
-    <input
-        type="text"
-        id="eventName"
-        placeholder="Event Name"
-    >
+<label><b>🖼️ Event Image</b></label>
+<input type="file" id="eventImage" accept="image/*" onchange="previewEventImage(event)">
 
+<img id="eventImagePreview" class="preview hidden" alt="Event preview">
 
-    <input
-        type="date"
-        id="eventDate"
-    >
-
-
-    <textarea
-        id="eventDescription"
-        placeholder="Event Description"
-    ></textarea>
-
-
-    <label>
-        <b>🖼️ Event Image</b>
-    </label>
-
-
-    <input
-        type="file"
-        id="eventImage"
-        accept="image/*"
-        onchange="previewEventImage(event)"
-    >
-
-
-    <img
-        id="eventImagePreview"
-        class="preview hidden"
-    >
-
-
-    <div class="flex">
-
-        <button
-            class="green"
-            onclick="addEvent()"
-        >
-            ➕ Add Event
-        </button>
-
-
-        <button
-            class="red"
-            onclick="removeEventImage()"
-        >
-            🗑 Remove Image
-        </button>
-
-    </div>
-
+<div class="flex">
+<button class="green" onclick="addEvent()">➕ Add Event</button>
+<button class="red" onclick="removeEventImage()">🗑 Remove Image</button>
+</div>
 </div>
 
-
-<!-- =====================================================
-     MANAGE EVENTS
-===================================================== -->
-
+<!-- MANAGE EVENTS -->
 <div class="card">
-
-    <h2>
-        🎪 Manage Events
-    </h2>
-
-
-    <div
-        id="eventsList"
-        class="event-grid"
-    ></div>
-
+<h2>🎪 Manage Events</h2>
+<div id="eventsList" class="event-grid"></div>
 </div>
 
-
-<!-- =====================================================
-     EVENT STATISTICS
-===================================================== -->
-
+<!-- EVENT STATISTICS -->
 <div class="card">
-
-    <h2>
-        📈 Event Statistics
-    </h2>
-
-
-    <div id="eventStatistics"></div>
-
+<h2>📈 Event Statistics</h2>
+<div id="eventStatistics"></div>
 </div>
 
-
-<!-- =====================================================
-     SEARCH BOOKINGS
-===================================================== -->
-
+<!-- SEARCH BOOKINGS -->
 <div class="card">
+<h2>🔎 Search Bookings</h2>
 
-    <h2>
-        🔎 Search Bookings
-    </h2>
+<input type="text" id="searchInput"
+placeholder="Search name, email, event, phone or ticket..."
+oninput="renderBookings()">
 
-
-    <input
-        type="text"
-        id="searchInput"
-        placeholder="Search name, email, event, phone or ticket..."
-        oninput="renderBookings()"
-    >
-
-
-    <div class="flex">
-
-        <button
-            class="blue"
-            onclick="loadBookings()"
-        >
-            🔄 Refresh Dashboard
-        </button>
-
-
-        <button
-            class="green"
-            onclick="exportCSV()"
-        >
-            📥 Export Bookings CSV
-        </button>
-
-    </div>
-
+<div class="flex">
+<button class="blue" onclick="loadBookings()">🔄 Refresh Dashboard</button>
+<button class="green" onclick="exportCSV()">📥 Export Bookings CSV</button>
+</div>
 </div>
 
-
-<!-- =====================================================
-     ALL BOOKINGS
-===================================================== -->
-
+<!-- ALL BOOKINGS -->
 <div class="card">
-
-    <h2>
-        📋 All Bookings
-    </h2>
-
-
-    <div id="bookingsList"></div>
-
-</div>
-
-
+<h2>📋 All Bookings</h2>
+<div id="bookingsList"></div>
 </div>
 
 </div>
-
+</div>
 
 <script>
 
-/* =====================================================
+/* =========================================
    FIREBASE CONFIGURATION
-===================================================== */
+========================================= */
 
 const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyC-T2k0YrJOfQb7LV5qcUsOPwvWI_edXKM",
-
-    authDomain:
-        "event-booking-app-ee02b.firebaseapp.com",
-
-    projectId:
-        "event-booking-app-ee02b",
-
-    storageBucket:
-        "event-booking-app-ee02b.firebasestorage.app",
-
-    messagingSenderId:
-        "526513199259",
-
-    appId:
-        "1:526513199259:web:92442ef0079e07a0364e3e",
-
-    measurementId:
-        "G-QXSZ66ZFRR"
-
+apiKey:"AIzaSyC-T2k0YrJOfQb7LV5qcUsOPwvWI_edXKM",
+authDomain:"event-booking-app-ee02b.firebaseapp.com",
+projectId:"event-booking-app-ee02b",
+storageBucket:"event-booking-app-ee02b.firebasestorage.app",
+messagingSenderId:"526513199259",
+appId:"1:526513199259:web:92442ef0079e07a0364e3e",
+measurementId:"G-QXSZ66ZFRR"
 };
 
-
-let firebaseReady = false;
-
-let db = null;
-
+let firebaseReady=false;
+let db=null;
+let auth=null;
 
 try{
+    if(!firebase.apps.length){
+        firebase.initializeApp(firebaseConfig);
+    }
 
-    firebase.initializeApp(
-        firebaseConfig
-    );
+    db=firebase.firestore();
+    auth=firebase.auth();
 
-    db =
-        firebase.firestore();
-
-    firebaseReady = true;
-
-    console.log(
-        "Firebase connected successfully."
-    );
+    firebaseReady=true;
 
 }catch(error){
+    console.error("Firebase initialization error:",error);
 
-    console.error(
-        "Firebase initialization error:",
-        error
-    );
-
+    document.getElementById("loginMessage").textContent=
+    "Firebase connection error: "+error.message;
 }
 
 
-/* =====================================================
-   ADMIN LOGIN
-===================================================== */
+/* =========================================
+   FIREBASE ADMIN AUTHENTICATION
+========================================= */
 
-const ADMIN_USERNAME =
-    "Rabilupau";
+function goToLoginPage(){
+    window.location.href="login.html";
+}
 
-const ADMIN_PASSWORD =
-    "Rabilu@123";
-
-
-function login(){
-
-    const username =
-        document
-        .getElementById("username")
-        .value
-        .trim();
-
-
-    const password =
-        document
-        .getElementById("password")
-        .value;
-
-
-    const message =
-        document.getElementById(
-            "loginMessage"
-        );
-
-
-    if(
-        username === ADMIN_USERNAME &&
-        password === ADMIN_PASSWORD
-    ){
-
-        localStorage.setItem(
-            "eventAdminLoggedIn",
-            "true"
-        );
-
-
-        document
-        .getElementById("loginPage")
-        .classList
-        .add("hidden");
-
-
-        document
-        .getElementById("dashboardPage")
-        .classList
-        .remove("hidden");
-
-
-        loadBookings();
-
-        loadEvents();
-
-    }else{
-
-        message.textContent =
-            "❌ Wrong username or password.";
-
-        message.style.color =
-            "red";
-
+async function logout(){
+    try{
+        await auth.signOut();
+        window.location.href="login.html";
+    }catch(error){
+        alert("Logout failed: "+error.message);
     }
-
 }
 
+function showDashboard(user){
 
-/* =====================================================
-   LOGOUT
-===================================================== */
+    document.getElementById("loginPage")
+    .classList.add("hidden");
 
-function logout(){
+    document.getElementById("dashboardPage")
+    .classList.remove("hidden");
 
-    localStorage.removeItem(
-        "eventAdminLoggedIn"
-    );
+    document.getElementById("adminEmail").textContent=
+    user.email || "Administrator";
 
-    location.reload();
-
+    loadBookings();
+    loadEvents();
 }
 
+if(firebaseReady){
 
-/* =====================================================
-   AUTO LOGIN
-===================================================== */
+    auth.onAuthStateChanged(async function(user){
 
-window.addEventListener(
-    "load",
-    function(){
+        const message=document.getElementById("loginMessage");
 
-        if(
-            localStorage.getItem(
-                "eventAdminLoggedIn"
-            ) === "true"
-        ){
+        if(!user){
 
-            document
-            .getElementById("loginPage")
-            .classList
-            .add("hidden");
+            document.getElementById("dashboardPage")
+            .classList.add("hidden");
 
+            document.getElementById("loginPage")
+            .classList.remove("hidden");
 
-            document
-            .getElementById("dashboardPage")
-            .classList
-            .remove("hidden");
+            message.textContent=
+            "You are not signed in. Please use the secure login page.";
 
-
-            loadBookings();
-
-            loadEvents();
-
+            return;
         }
 
-    }
+        try{
+
+            const adminDoc=await db
+            .collection("admins")
+            .doc(user.uid)
+            .get();
+
+            if(!adminDoc.exists ||
+               adminDoc.data().role!=="admin"){
+
+                await auth.signOut();
+
+                message.textContent=
+                "You are not authorized to access this dashboard.";
+
+                return;
+            }
+
+            showDashboard(user);
+
+        }catch(error){
+
+            console.error("Admin verification error:",error);
+
+            message.textContent=
+            "Unable to verify administrator: "+error.message;
+        }
+
+    });
+
+}else{
+
+    document.getElementById("loginMessage").textContent=
+    "Firebase is not connected. Check your configuration.";
+}
+
+
+/* =========================================
+   EVENTS STORAGE
+   Events are currently saved in this browser.
+========================================= */
+
+let events=JSON.parse(
+    localStorage.getItem("eventList") || "[]"
 );
 
-
-/* =====================================================
-   EVENTS STORAGE
-===================================================== */
-
-let events =
-    JSON.parse(
-        localStorage.getItem(
-            "eventList"
-        ) || "[]"
-    );
+let allBookings=[];
 
 
-/* =====================================================
-   BOOKINGS
-===================================================== */
-
-let allBookings = [];
-
-
-/* =====================================================
+/* =========================================
    EVENT IMAGE PREVIEW
-===================================================== */
+========================================= */
 
 function previewEventImage(event){
 
-    const file =
-        event.target.files[0];
+    const file=event.target.files[0];
 
-
-    const preview =
-        document.getElementById(
-            "eventImagePreview"
-        );
-
+    const preview=document.getElementById("eventImagePreview");
 
     if(!file){
-
-        preview.classList
-        .add("hidden");
-
+        preview.classList.add("hidden");
         return;
-
     }
 
+    if(!file.type.startsWith("image/")){
+        alert("Please select an image file.");
+        event.target.value="";
+        return;
+    }
 
-    const reader =
-        new FileReader();
+    const reader=new FileReader();
 
+    reader.onload=function(e){
+        preview.src=e.target.result;
+        preview.classList.remove("hidden");
+    };
 
-    reader.onload =
-        function(e){
-
-            preview.src =
-                e.target.result;
-
-
-            preview.classList
-            .remove("hidden");
-
-        };
-
-
-    reader.readAsDataURL(
-        file
-    );
-
+    reader.readAsDataURL(file);
 }
 
 
 function removeEventImage(){
 
-    document.getElementById(
-        "eventImage"
-    ).value = "";
+    document.getElementById("eventImage").value="";
 
+    const preview=document.getElementById("eventImagePreview");
 
-    const preview =
-        document.getElementById(
-            "eventImagePreview"
-        );
-
-
-    preview.src = "";
-
-
-    preview.classList
-    .add("hidden");
-
+    preview.src="";
+    preview.classList.add("hidden");
 }
 
 
-/* =====================================================
+/* =========================================
    ADD EVENT
-===================================================== */
+========================================= */
 
 function addEvent(){
 
-    const name =
-        document
-        .getElementById("eventName")
-        .value
-        .trim();
+    const name=document.getElementById("eventName").value.trim();
 
+    const date=document.getElementById("eventDate").value;
 
-    const date =
-        document
-        .getElementById("eventDate")
-        .value;
+    const description=document.getElementById("eventDescription").value.trim();
 
-
-    const description =
-        document
-        .getElementById("eventDescription")
-        .value
-        .trim();
-
-
-    const imageInput =
-        document.getElementById(
-            "eventImage"
-        );
-
+    const imageInput=document.getElementById("eventImage");
 
     if(!name || !date){
-
-        alert(
-            "Please enter Event Name and Event Date."
-        );
-
+        alert("Please enter Event Name and Event Date.");
         return;
-
     }
-
 
     function saveEvent(image){
 
-        const newEvent = {
-
-            id:
-                "EVT-" +
-                Date.now(),
-
-            name:
-                name,
-
-            date:
-                date,
-
-            description:
-                description,
-
-            image:
-                image || "",
-
-            createdAt:
-                new Date().toISOString()
-
+        const newEvent={
+            id:"EVT-"+Date.now(),
+            name:name,
+            date:date,
+            description:description,
+            image:image || "",
+            createdAt:new Date().toISOString()
         };
 
+        events.push(newEvent);
 
-        events.push(
-            newEvent
-        );
+        localStorage.setItem("eventList",JSON.stringify(events));
 
-
-        localStorage.setItem(
-            "eventList",
-            JSON.stringify(events)
-        );
-
-
-        document.getElementById(
-            "eventName"
-        ).value = "";
-
-
-        document.getElementById(
-            "eventDate"
-        ).value = "";
-
-
-        document.getElementById(
-            "eventDescription"
-        ).value = "";
-
+        document.getElementById("eventName").value="";
+        document.getElementById("eventDate").value="";
+        document.getElementById("eventDescription").value="";
 
         removeEventImage();
 
-
         loadEvents();
 
-
-        alert(
-            "✅ Event added successfully."
-        );
-
+        alert("✅ Event added successfully.");
     }
 
+    if(imageInput.files.length){
 
-    if(
-        imageInput.files.length
-    ){
+        const reader=new FileReader();
 
-        const reader =
-            new FileReader();
+        reader.onload=function(e){
+            saveEvent(e.target.result);
+        };
 
-
-        reader.onload =
-            function(e){
-
-                saveEvent(
-                    e.target.result
-                );
-
-            };
-
-
-        reader.readAsDataURL(
-            imageInput.files[0]
-        );
+        reader.readAsDataURL(imageInput.files[0]);
 
     }else{
-
         saveEvent("");
-
     }
-
 }
 
 
-/* =====================================================
+/* =========================================
    LOAD EVENTS
-===================================================== */
+========================================= */
 
 function loadEvents(){
 
-    const container =
-        document.getElementById(
-            "eventsList"
-        );
+    const container=document.getElementById("eventsList");
 
+    container.innerHTML="";
 
-    container.innerHTML = "";
-
-
-    if(events.length === 0){
-
-        container.innerHTML =
-            "<p class='empty'>No events added yet.</p>";
-
-        renderEventStatistics();
-
-        return;
-
+    if(events.length===0){
+        container.innerHTML=
+        "<p class='empty'>No events added yet.</p>";
     }
 
+    events.forEach(function(event){
 
-    events.forEach(
-        function(event){
+        const card=document.createElement("div");
 
-            const card =
-                document.createElement(
-                    "div"
-                );
+        card.className="event-card";
 
+        card.innerHTML=`
 
-            card.className =
-                "event-card";
+        ${event.image
+        ? `<img src="${escapeHTML(event.image)}" alt="Event image">`
+        : ""}
 
+        <h3>${escapeHTML(event.name)}</h3>
 
-            card.innerHTML = `
+        <p>📅 ${escapeHTML(event.date)}</p>
 
-                ${
-                    event.image
-                    ?
-                    `<img src="${escapeHTML(event.image)}">`
-                    :
-                    ""
-                }
+        <p>${escapeHTML(event.description || "")}</p>
 
-                <h3>
-                    ${escapeHTML(event.name)}
-                </h3>
+        <button class="red"
+        onclick="deleteEvent('${escapeHTML(event.id)}')">
+        🗑 Delete Event
+        </button>
+        `;
 
-                <p>
-                    📅 ${escapeHTML(event.date)}
-                </p>
+        container.appendChild(card);
 
-                <p>
-                    ${escapeHTML(
-                        event.description || ""
-                    )}
-                </p>
-
-                <button
-                    class="red"
-                    onclick="deleteEvent('${escapeHTML(event.id)}')"
-                >
-                    🗑 Delete Event
-                </button>
-
-            `;
-
-
-            container.appendChild(
-                card
-            );
-
-        }
-    );
-
+    });
 
     renderEventStatistics();
-
 }
 
 
 function deleteEvent(id){
 
-    if(
-        !confirm(
-            "Delete this event?"
-        )
-    ){
+    if(!confirm("Delete this event?")) return;
 
-        return;
+    events=events.filter(function(e){
+        return e.id!==id;
+    });
 
-    }
-
-
-    events =
-        events.filter(
-            function(e){
-
-                return e.id !== id;
-
-            }
-        );
-
-
-    localStorage.setItem(
-        "eventList",
-        JSON.stringify(events)
-    );
-
+    localStorage.setItem("eventList",JSON.stringify(events));
 
     loadEvents();
-
 }
 
 
-/* =====================================================
+/* =========================================
    LOAD FIRESTORE BOOKINGS
-===================================================== */
+========================================= */
 
 async function loadBookings(){
 
-    const container =
-        document.getElementById(
-            "bookingsList"
-        );
-
+    const container=document.getElementById("bookingsList");
 
     if(!firebaseReady){
 
-        container.innerHTML = `
+        container.innerHTML=
+        "<div class='firebase-error'>❌ Firebase is not connected.</div>";
 
-            <div class="firebase-error">
-
-                ❌ Firebase is not connected.
-
-            </div>
-
-        `;
-
-
-        allBookings = [];
-
+        allBookings=[];
 
         updateStats();
 
-        renderEventStatistics();
-
         return;
-
     }
 
-
-    container.innerHTML = `
-
-        <div class="loading">
-
-            🔄 Loading bookings from Firebase...
-
-        </div>
-
-    `;
-
+    container.innerHTML=
+    "<div class='loading'>🔄 Loading bookings from Firebase...</div>";
 
     try{
 
-        const snapshot =
-            await db
-            .collection("bookings")
-            .get();
+        const snapshot=await db
+        .collection("bookings")
+        .get();
 
+        allBookings=[];
 
-        allBookings = [];
+        snapshot.forEach(function(doc){
 
+            const data=doc.data() || {};
 
-        snapshot.forEach(
-            function(doc){
+            allBookings.push({
+                id:doc.id,
+                ...data
+            });
 
-                const data =
-                    doc.data() || {};
-
-
-                allBookings.push({
-
-                    id:
-                        doc.id,
-
-                    ...data
-
-                });
-
-            }
-        );
-
-
-        console.log(
-            "Bookings loaded:",
-            allBookings
-        );
-
+        });
 
         updateStats();
 
@@ -1588,1505 +526,720 @@ async function loadBookings(){
 
         renderEventStatistics();
 
-
     }catch(error){
 
-        console.error(
-            "Firestore booking error:",
-            error
-        );
+        console.error("Firestore booking error:",error);
 
-
-        allBookings = [];
-
+        allBookings=[];
 
         updateStats();
 
         renderEventStatistics();
 
+        container.innerHTML=`
 
-        container.innerHTML = `
+        <div class="firebase-error">
 
-            <div class="firebase-error">
+        ❌ Error loading bookings.
 
-                ❌ Error loading bookings.
+        <br><br>
 
-                <br><br>
+        <b>${escapeHTML(error.message)}</b>
 
-                <b>
-                    ${escapeHTML(error.message)}
-                </b>
+        <br><br>
 
-                <br><br>
+        Check your Firebase Firestore rules and collection name.
 
-                Check your Firebase Firestore rules
-                and make sure the collection is named
-                <b>bookings</b>.
-
-            </div>
-
+        </div>
         `;
-
     }
-
 }
 
 
-/* =====================================================
+/* =========================================
    UPDATE GENERAL STATS
-===================================================== */
+========================================= */
 
 function updateStats(){
 
-    let totalTickets = 0;
+    let totalTickets=0;
 
+    allBookings.forEach(function(b){
 
-    allBookings.forEach(
-        function(b){
+        totalTickets+=Number(
+            b.quantity ||
+            b.tickets ||
+            b.numberOfTickets ||
+            1
+        );
 
-            totalTickets +=
-                Number(
-                    b.quantity ||
-                    b.tickets ||
-                    b.numberOfTickets ||
-                    1
-                );
+    });
 
-        }
-    );
+    const checked=allBookings.filter(function(b){
+        return isCheckedIn(b);
+    }).length;
 
+    document.getElementById("totalBookings").textContent=
+    allBookings.length;
 
-    const checked =
-        allBookings.filter(
-            function(b){
+    document.getElementById("totalTickets").textContent=
+    totalTickets;
 
-                return isCheckedIn(b);
+    document.getElementById("checkedIn").textContent=
+    checked;
 
-            }
-        ).length;
-
-
-    document.getElementById(
-        "totalBookings"
-    ).textContent =
-        allBookings.length;
-
-
-    document.getElementById(
-        "totalTickets"
-    ).textContent =
-        totalTickets;
-
-
-    document.getElementById(
-        "checkedIn"
-    ).textContent =
-        checked;
-
-
-    document.getElementById(
-        "notCheckedIn"
-    ).textContent =
-        allBookings.length -
-        checked;
-
+    document.getElementById("notCheckedIn").textContent=
+    allBookings.length-checked;
 }
 
 
-/* =====================================================
+/* =========================================
    CHECK-IN DETECTION
-===================================================== */
+========================================= */
 
 function isCheckedIn(b){
 
-    return (
-
-        b.checkedIn === true ||
-
-        b.status === "checked-in" ||
-
-        b.status === "Checked-in" ||
-
-        b.status === "checkedIn"
-
+    return(
+        b.checkedIn===true ||
+        b.status==="checked-in" ||
+        b.status==="Checked-in" ||
+        b.status==="checkedIn"
     );
-
 }
 
 
-/* =====================================================
-   EVENT NAME
-===================================================== */
+/* =========================================
+   BOOKING INFORMATION
+========================================= */
 
 function getBookingEvent(b){
 
     return String(
-
         b.event ||
-
         b.eventName ||
-
         b.selectedEvent ||
-
         b.selectedEventName ||
-
         b.event_title ||
-
         b.title ||
-
         ""
-
-    )
-    .trim();
-
+    ).trim();
 }
-
-
-/* =====================================================
-   NORMALIZE EVENT NAME
-===================================================== */
 
 function normalizeEventName(value){
 
-    return String(
-        value || ""
-    )
+    return String(value || "")
     .toLowerCase()
     .replace(/\s+/g," ")
     .trim();
-
 }
-
-
-/* =====================================================
-   BOOKING NAME
-===================================================== */
 
 function getBookingName(b){
 
-    return (
-
+    return(
         b.name ||
-
         b.fullName ||
-
         b.customerName ||
-
         b.userName ||
-
         b.bookerName ||
-
         "N/A"
-
     );
-
 }
-
-
-/* =====================================================
-   TICKET ID
-===================================================== */
 
 function getTicketId(b){
 
-    return (
-
+    return(
         b.ticketId ||
-
         b.ticketNumber ||
-
         b.ticket ||
-
         b.ticketID ||
-
         b.bookingId ||
-
         b.id ||
-
         "N/A"
-
     );
-
 }
 
 
-/* =====================================================
+/* =========================================
    GET ALL EVENT NAMES
-===================================================== */
+========================================= */
 
 function getAllEventNames(){
 
-    const names = [];
+    const names=[];
 
+    events.forEach(function(event){
 
-    events.forEach(
-        function(event){
+        const name=String(event.name || "").trim();
 
-            const name =
-                String(
-                    event.name || ""
-                ).trim();
+        if(name && !names.some(function(existing){
 
+            return normalizeEventName(existing)===
+                   normalizeEventName(name);
 
-            if(name){
-
-                if(
-                    !names.some(
-                        function(existing){
-
-                            return normalizeEventName(
-                                existing
-                            ) ===
-                            normalizeEventName(
-                                name
-                            );
-
-                        }
-                    )
-                ){
-
-                    names.push(name);
-
-                }
-
-            }
-
+        })){
+            names.push(name);
         }
-    );
 
+    });
 
-    allBookings.forEach(
-        function(booking){
+    allBookings.forEach(function(booking){
 
-            const name =
-                getBookingEvent(
-                    booking
-                );
+        const name=getBookingEvent(booking);
 
+        if(name && !names.some(function(existing){
 
-            if(name){
+            return normalizeEventName(existing)===
+                   normalizeEventName(name);
 
-                if(
-                    !names.some(
-                        function(existing){
-
-                            return normalizeEventName(
-                                existing
-                            ) ===
-                            normalizeEventName(
-                                name
-                            );
-
-                        }
-                    )
-                ){
-
-                    names.push(name);
-
-                }
-
-            }
-
+        })){
+            names.push(name);
         }
-    );
 
+    });
 
     return names;
-
 }
 
 
-/* =====================================================
+/* =========================================
    EVENT STATISTICS
-===================================================== */
+========================================= */
 
 function renderEventStatistics(){
 
-    const container =
-        document.getElementById(
-            "eventStatistics"
-        );
+    const container=document.getElementById("eventStatistics");
 
+    container.innerHTML="";
 
-    container.innerHTML = "";
+    const eventNames=getAllEventNames();
 
+    if(eventNames.length===0){
 
-    const eventNames =
-        getAllEventNames();
+        container.innerHTML=`
 
+        <div class="empty">
 
-    if(eventNames.length === 0){
+        📊 No event statistics available yet.
 
-        container.innerHTML = `
+        <br><br>
 
-            <div class="empty">
+        Once someone books an event, the statistics will appear here.
 
-                📊 No event statistics available yet.
-
-                <br><br>
-
-                Once someone books an event,
-                the statistics will appear here.
-
-            </div>
+        </div>
 
         `;
 
         return;
-
     }
 
+    eventNames.forEach(function(eventName){
 
-    eventNames.forEach(
-        function(eventName){
+        const eventBookings=allBookings.filter(function(b){
 
-            const eventBookings =
-                allBookings.filter(
-                    function(b){
+            return normalizeEventName(getBookingEvent(b))===
+                   normalizeEventName(eventName);
 
-                        return (
-                            normalizeEventName(
-                                getBookingEvent(b)
-                            ) ===
-                            normalizeEventName(
-                                eventName
-                            )
-                        );
+        });
 
-                    }
-                );
+        const checked=eventBookings.filter(isCheckedIn).length;
 
+        let totalTickets=0;
 
-            const checked =
-                eventBookings.filter(
-                    function(b){
+        eventBookings.forEach(function(b){
 
-                        return isCheckedIn(b);
-
-                    }
-                ).length;
-
-
-            let totalTickets = 0;
-
-
-            eventBookings.forEach(
-                function(b){
-
-                    totalTickets +=
-                        Number(
-                            b.quantity ||
-                            b.tickets ||
-                            b.numberOfTickets ||
-                            1
-                        );
-
-                }
+            totalTickets+=Number(
+                b.quantity ||
+                b.tickets ||
+                b.numberOfTickets ||
+                1
             );
 
+        });
 
-            let names = "";
+        let names="";
 
+        eventBookings.forEach(function(b){
 
-            eventBookings.forEach(
-                function(b){
+            names+=`
 
-                    names += `
-
-                        <li>
-
-                            ${escapeHTML(
-                                getBookingName(b)
-                            )}
-
-                            ${
-                                isCheckedIn(b)
-                                ?
-                                " ✅"
-                                :
-                                ""
-                            }
-
-                        </li>
-
-                    `;
-
-                }
-            );
-
-
-            const box =
-                document.createElement(
-                    "div"
-                );
-
-
-            box.className =
-                "event-card";
-
-
-            box.innerHTML = `
-
-                <h3>
-
-                    🎪 ${escapeHTML(
-                        eventName
-                    )}
-
-                </h3>
-
-
-                <p>
-
-                    👥 Total Bookings:
-
-                    <b>
-                        ${eventBookings.length}
-                    </b>
-
-                </p>
-
-
-                <p>
-
-                    🎫 Total Tickets:
-
-                    <b>
-                        ${totalTickets}
-                    </b>
-
-                </p>
-
-
-                <p>
-
-                    ✅ Checked-in:
-
-                    <b>
-                        ${checked}
-                    </b>
-
-                </p>
-
-
-                <p>
-
-                    ❌ Not Checked-in:
-
-                    <b>
-                        ${eventBookings.length - checked}
-                    </b>
-
-                </p>
-
-
-                <hr>
-
-
-                <b>
-                    People who booked:
-                </b>
-
-
-                ${
-                    names
-
-                    ?
-
-                    `<ul class="event-stat-names">
-                        ${names}
-                    </ul>`
-
-                    :
-
-                    "<p>No bookings yet.</p>"
-                }
+            <li>
+            ${escapeHTML(getBookingName(b))}
+            ${isCheckedIn(b) ? " ✅" : ""}
+            </li>
 
             `;
 
+        });
 
-            container.appendChild(
-                box
-            );
+        const box=document.createElement("div");
 
+        box.className="event-card";
+
+        box.innerHTML=`
+
+        <h3>🎪 ${escapeHTML(eventName)}</h3>
+
+        <p>👥 Total Bookings: <b>${eventBookings.length}</b></p>
+
+        <p>🎫 Total Tickets: <b>${totalTickets}</b></p>
+
+        <p>✅ Checked-in: <b>${checked}</b></p>
+
+        <p>❌ Not Checked-in: <b>${eventBookings.length-checked}</b></p>
+
+        <hr>
+
+        <b>People who booked:</b>
+
+        ${
+            names
+            ? `<ul class="event-stat-names">${names}</ul>`
+            : "<p>No bookings yet.</p>"
         }
-    );
 
+        `;
+
+        container.appendChild(box);
+
+    });
 }
 
 
-/* =====================================================
-   SEARCH + BOOKINGS
-===================================================== */
+/* =========================================
+   SEARCH AND RENDER BOOKINGS
+========================================= */
 
 function renderBookings(){
 
-    const container =
-        document.getElementById(
-            "bookingsList"
-        );
+    const container=document.getElementById("bookingsList");
 
+    const input=document.getElementById("searchInput");
 
-    const input =
-        document.getElementById(
-            "searchInput"
-        );
+    const search=(input ? input.value : "").toLowerCase().trim();
 
+    const filtered=allBookings.filter(function(b){
 
-    const search =
-        (
-            input
-            ?
-            input.value
-            :
-            ""
-        )
-        .toLowerCase()
-        .trim();
+        const text=[
 
+            b.name,
+            b.fullName,
+            b.customerName,
+            b.userName,
+            b.email,
+            b.phone,
+            b.phoneNumber,
+            getBookingEvent(b),
+            b.ticketId,
+            b.ticketNumber,
+            b.ticket,
+            b.bookingId,
+            b.date,
+            b.eventDate
 
-    const filtered =
-        allBookings.filter(
-            function(b){
+        ].join(" ").toLowerCase();
 
-                const text = [
+        return text.includes(search);
 
-                    b.name,
+    });
 
-                    b.fullName,
+    container.innerHTML="";
 
-                    b.customerName,
+    if(filtered.length===0){
 
-                    b.userName,
-
-                    b.email,
-
-                    b.phone,
-
-                    b.phoneNumber,
-
-                    getBookingEvent(b),
-
-                    b.ticketId,
-
-                    b.ticketNumber,
-
-                    b.ticket,
-
-                    b.bookingId,
-
-                    b.date,
-
-                    b.eventDate
-
-                ]
-                .join(" ")
-                .toLowerCase();
-
-
-                return text.includes(
-                    search
-                );
-
-            }
-        );
-
-
-    container.innerHTML = "";
-
-
-    if(filtered.length === 0){
-
-        container.innerHTML =
-            "<p class='empty'>No bookings found.</p>";
+        container.innerHTML=
+        "<p class='empty'>No bookings found.</p>";
 
         return;
-
     }
 
+    filtered.forEach(function(b){
 
-    filtered.forEach(
-        function(b){
+        const checked=isCheckedIn(b);
 
-            const checked =
-                isCheckedIn(b);
+        const ticket=getTicketId(b);
 
+        const div=document.createElement("div");
 
-            const ticket =
-                getTicketId(b);
+        div.className="booking";
 
+        div.innerHTML=`
 
-            const div =
-                document.createElement(
-                    "div"
-                );
+        <b>🎫 Ticket: ${escapeHTML(ticket)}</b>
 
+        <p>👤 Name: ${escapeHTML(getBookingName(b))}</p>
 
-            div.className =
-                "booking";
+        <p>📧 Email: ${escapeHTML(b.email || "N/A")}</p>
 
+        <p>📱 Phone: ${escapeHTML(b.phone || b.phoneNumber || "N/A")}</p>
 
-            div.innerHTML = `
+        <p>🎪 Event: ${escapeHTML(getBookingEvent(b) || "N/A")}</p>
 
-                <b>
+        <p>🎟️ Quantity: ${escapeHTML(
+            b.quantity || b.tickets || b.numberOfTickets || "1"
+        )}</p>
 
-                    🎫 Ticket:
+        <p>📅 Date: ${escapeHTML(
+            b.date || b.eventDate || b.bookingDate || "N/A"
+        )}</p>
 
-                    ${escapeHTML(ticket)}
+        <p>Status:
 
-                </b>
+        <span class="status ${checked ? "checked" : "notchecked"}">
 
+        ${checked ? "CHECKED-IN" : "NOT CHECKED-IN"}
 
-                <p>
+        </span>
 
-                    👤 Name:
+        </p>
 
-                    ${escapeHTML(
-                        getBookingName(b)
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    📧 Email:
-
-                    ${escapeHTML(
-                        b.email ||
-                        "N/A"
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    📱 Phone:
-
-                    ${escapeHTML(
-                        b.phone ||
-                        b.phoneNumber ||
-                        "N/A"
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    🎪 Event:
-
-                    ${escapeHTML(
-                        getBookingEvent(b) ||
-                        "N/A"
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    🎟️ Quantity:
-
-                    ${escapeHTML(
-                        b.quantity ||
-                        b.tickets ||
-                        b.numberOfTickets ||
-                        "1"
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    📅 Date:
-
-                    ${escapeHTML(
-                        b.date ||
-                        b.eventDate ||
-                        b.bookingDate ||
-                        "N/A"
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    Status:
-
-                    <span class="status ${
-                        checked
-                        ?
-                        "checked"
-                        :
-                        "notchecked"
-                    }">
-
-                        ${
-                            checked
-                            ?
-                            "CHECKED-IN"
-                            :
-                            "NOT CHECKED-IN"
-                        }
-
-                    </span>
-
-                </p>
-
-
-                ${
-                    !checked
-
-                    ?
-
-                    `
-                    <button
-                        class="green"
-                        onclick="checkInVerified('${escapeHTML(b.id)}')"
-                    >
-                        ✅ Check-in
-                    </button>
-                    `
-
-                    :
-
-                    `
-                    <p class="small">
-                        ✅ This ticket has already been checked-in.
-                    </p>
-                    `
-                }
-
-
-                <button
-                    class="red delete-booking"
-                    onclick="deleteBooking('${escapeHTML(b.id)}')"
-                >
-
-                    🗑 Delete Booking
-
-                </button>
-
-            `;
-
-
-            container.appendChild(
-                div
-            );
-
+        ${
+            !checked
+            ? `<button class="green" onclick="checkInVerified('${escapeHTML(b.id)}')">✅ Check-in</button>`
+            : `<p class="small">✅ This ticket has already been checked-in.</p>`
         }
-    );
 
+        <button class="red"
+        onclick="deleteBooking('${escapeHTML(b.id)}')">
+        🗑 Delete Booking
+        </button>
+
+        `;
+
+        container.appendChild(div);
+
+    });
 }
 
 
-/* =====================================================
+/* =========================================
    DELETE BOOKING
-===================================================== */
+========================================= */
 
 async function deleteBooking(documentId){
 
     if(!firebaseReady){
-
-        alert(
-            "❌ Firebase is not connected."
-        );
-
+        alert("❌ Firebase is not connected.");
         return;
-
     }
 
-
-    const booking =
-        allBookings.find(
-            function(b){
-
-                return b.id ===
-                    documentId;
-
-            }
-        );
-
+    const booking=allBookings.find(function(b){
+        return b.id===documentId;
+    });
 
     if(!booking){
-
-        alert(
-            "❌ Booking not found."
-        );
-
+        alert("❌ Booking not found.");
         return;
-
     }
 
+    const confirmed=confirm(
 
-    const name =
-        getBookingName(
-            booking
-        );
+        "⚠️ DELETE BOOKING\n\n" +
 
+        "Name: "+getBookingName(booking)+"\n" +
 
-    const ticket =
-        getTicketId(
-            booking
-        );
+        "Ticket: "+getTicketId(booking)+"\n\n" +
 
+        "This booking will be permanently deleted from Firebase.\n\n" +
 
-    const confirmed =
-        confirm(
+        "Do you want to continue?"
 
-            "⚠️ DELETE BOOKING\n\n" +
+    );
 
-            "Name: " +
-            name +
-            "\n" +
-
-            "Ticket: " +
-            ticket +
-            "\n\n" +
-
-            "This booking will be permanently deleted from Firebase.\n\n" +
-
-            "Do you want to continue?"
-
-        );
-
-
-    if(!confirmed){
-
-        return;
-
-    }
-
+    if(!confirmed) return;
 
     try{
 
-        await db
-        .collection("bookings")
+        await db.collection("bookings")
         .doc(documentId)
         .delete();
 
-
-        alert(
-            "✅ Booking deleted successfully."
-        );
-
+        alert("✅ Booking deleted successfully.");
 
         await loadBookings();
 
-
     }catch(error){
 
-        console.error(
-            "Delete booking error:",
-            error
-        );
+        console.error("Delete booking error:",error);
 
-
-        alert(
-
-            "❌ Could not delete booking:\n\n" +
-
-            error.message
-
-        );
-
+        alert("❌ Could not delete booking:\n\n"+error.message);
     }
-
 }
 
 
-/* =====================================================
+/* =========================================
    FIND BOOKING BY TICKET ID
-===================================================== */
+========================================= */
 
-function findBookingByTicket(
-    ticketId
-){
+function findBookingByTicket(ticketId){
 
-    const wanted =
-        String(
-            ticketId || ""
-        )
-        .trim()
-        .toLowerCase();
+    const wanted=String(ticketId || "").trim().toLowerCase();
 
+    return allBookings.find(function(b){
 
-    return allBookings.find(
-        function(b){
+        const ids=[
+            b.ticketId,
+            b.ticketNumber,
+            b.ticket,
+            b.ticketID,
+            b.bookingId,
+            b.id
+        ];
 
-            const ids = [
+        return ids.some(function(id){
 
-                b.ticketId,
+            return String(id || "").trim().toLowerCase()===wanted;
 
-                b.ticketNumber,
+        });
 
-                b.ticket,
-
-                b.ticketID,
-
-                b.bookingId,
-
-                b.id
-
-            ];
-
-
-            return ids.some(
-                function(id){
-
-                    return String(
-                        id || ""
-                    )
-                    .trim()
-                    .toLowerCase()
-                    ===
-                    wanted;
-
-                }
-            );
-
-        }
-    );
-
+    });
 }
 
 
-/* =====================================================
+/* =========================================
    VERIFY TICKET BY ID
-===================================================== */
+========================================= */
 
 function verifyTicketByID(){
 
-    const ticketId =
-        document
-        .getElementById(
-            "ticketIdInput"
-        )
-        .value
-        .trim();
-
+    const ticketId=document
+    .getElementById("ticketIdInput")
+    .value.trim();
 
     if(!ticketId){
 
-        showVerifyResult(
-
-            "error",
-
-            "❌ Please enter a Ticket ID."
-
-        );
+        showVerifyResult("error","❌ Please enter a Ticket ID.");
 
         return;
-
     }
 
-
-    const booking =
-        findBookingByTicket(
-            ticketId
-        );
-
+    const booking=findBookingByTicket(ticketId);
 
     if(!booking){
 
         showVerifyResult(
-
             "error",
-
             "❌ Ticket not found. Please refresh the dashboard first."
-
         );
 
         return;
-
     }
 
-
-    showBookingVerification(
-        booking
-    );
-
+    showBookingVerification(booking);
 }
 
 
-/* =====================================================
+/* =========================================
    QR SCANNER
-===================================================== */
+========================================= */
 
-let html5QrCode = null;
-
+let html5QrCode=null;
 
 function startScanner(){
 
-    if(html5QrCode){
+    if(html5QrCode) return;
 
-        return;
-
-    }
-
-
-    html5QrCode =
-        new Html5Qrcode(
-            "reader"
-        );
-
+    html5QrCode=new Html5Qrcode("reader");
 
     html5QrCode.start(
 
-        {
-            facingMode:
-                "environment"
-        },
+        {facingMode:"environment"},
 
-        {
-            fps:10,
-            qrbox:250
-        },
+        {fps:10,qrbox:250},
 
         function(decodedText){
 
-            handleQRResult(
-                decodedText
-            );
+            handleQRResult(decodedText);
 
         },
 
         function(errorMessage){
-
             // Scanner continues
-
         }
 
-    )
-    .catch(
-        function(error){
+    ).catch(function(error){
 
-            console.error(
-                error
-            );
+        console.error(error);
 
+        html5QrCode=null;
 
-            html5QrCode =
-                null;
+        showVerifyResult(
+            "error",
+            "❌ Camera could not start. Please allow camera permission."
+        );
 
-
-            showVerifyResult(
-
-                "error",
-
-                "❌ Camera could not start. Please allow camera permission."
-
-            );
-
-        }
-    );
-
+    });
 }
 
 
 function stopScanner(){
 
-    if(!html5QrCode){
+    if(!html5QrCode) return;
 
-        return;
+    html5QrCode.stop().then(function(){
 
-    }
+        html5QrCode.clear();
 
+        html5QrCode=null;
 
-    html5QrCode
-    .stop()
-    .then(
-        function(){
+    }).catch(function(error){
 
-            html5QrCode.clear();
+        console.log(error);
 
-            html5QrCode =
-                null;
+        html5QrCode=null;
 
-        }
-    )
-    .catch(
-        function(error){
-
-            console.log(
-                error
-            );
-
-            html5QrCode =
-                null;
-
-        }
-    );
-
+    });
 }
 
 
-/* =====================================================
+/* =========================================
    HANDLE QR RESULT
-===================================================== */
+========================================= */
 
-function handleQRResult(
-    decodedText
-){
+function handleQRResult(decodedText){
 
-    const value =
-        String(
-            decodedText || ""
-        )
-        .trim();
+    const value=String(decodedText || "").trim();
 
+    document.getElementById("ticketIdInput").value=value;
 
-    document
-    .getElementById(
-        "ticketIdInput"
-    )
-    .value =
-        value;
-
-
-    let booking =
-        findBookingByTicket(
-            value
-        );
-
+    let booking=findBookingByTicket(value);
 
     if(!booking){
 
         try{
 
-            const obj =
-                JSON.parse(
-                    value
-                );
+            const obj=JSON.parse(value);
 
-
-            const ticket =
+            const ticket=
                 obj.ticketId ||
-
                 obj.ticketNumber ||
-
                 obj.ticket ||
-
                 obj.ticketID ||
-
                 obj.bookingId;
-
 
             if(ticket){
 
-                booking =
-                    findBookingByTicket(
-                        String(ticket)
-                    );
+                booking=findBookingByTicket(String(ticket));
 
             }
 
         }catch(error){
-
             // QR is not JSON
-
         }
-
     }
-
 
     if(booking){
 
-        showBookingVerification(
-            booking
-        );
+        showBookingVerification(booking);
 
     }else{
 
         showVerifyResult(
-
             "error",
-
-            "❌ QR Code was scanned, but no matching ticket was found." +
-
-            "<br><br>" +
-
-            "<b>QR Data:</b> " +
-
-            escapeHTML(
-                value
-            )
-
+            "❌ QR Code was scanned, but no matching ticket was found."+
+            "<br><br><b>QR Data:</b> "+escapeHTML(value)
         );
 
     }
-
 }
 
 
-/* =====================================================
+/* =========================================
    SCAN QR FROM GALLERY
-===================================================== */
+========================================= */
 
-async function scanGallery(
-    event
-){
+async function scanGallery(event){
 
-    const file =
-        event.target.files[0];
+    const file=event.target.files[0];
 
-
-    if(!file){
-
-        return;
-
-    }
-
+    if(!file) return;
 
     try{
 
-        const scanner =
-            new Html5Qrcode(
-                "reader"
-            );
+        const scanner=new Html5Qrcode("reader");
 
-
-        const result =
-            await scanner.scanFile(
-                file,
-                true
-            );
-
+        const result=await scanner.scanFile(file,true);
 
         await scanner.clear();
 
-
-        handleQRResult(
-            result
-        );
-
+        handleQRResult(result);
 
     }catch(error){
 
-        console.error(
-            error
-        );
-
+        console.error(error);
 
         showVerifyResult(
-
             "error",
-
             "❌ No readable QR Code was found in this image."
-
         );
 
     }
 
-
-    event.target.value = "";
-
+    event.target.value="";
 }
 
 
-/* =====================================================
+/* =========================================
    SHOW VERIFICATION
-===================================================== */
+========================================= */
 
-function showBookingVerification(
-    booking
-){
+function showBookingVerification(booking){
 
-    const checked =
-        isCheckedIn(
-            booking
-        );
+    const checked=isCheckedIn(booking);
 
+    const ticket=getTicketId(booking);
 
-    const ticket =
-        getTicketId(
-            booking
-        );
+    const result=document.getElementById("verifyResult");
 
+    result.className="verify-result "+(checked ? "warning" : "success");
 
-    const result =
-        document.getElementById(
-            "verifyResult"
-        );
+    result.innerHTML=`
 
+    <h3>
+    ${checked ? "⚠️ Ticket Already Checked-in" : "✅ Valid Ticket"}
+    </h3>
 
-    result.className =
-        "verify-result " +
-        (
-            checked
-            ?
-            "warning"
-            :
-            "success"
-        );
+    <p><b>Ticket ID:</b> ${escapeHTML(ticket)}</p>
 
+    <p><b>Name:</b> ${escapeHTML(getBookingName(booking))}</p>
 
-    result.innerHTML = `
+    <p><b>Email:</b> ${escapeHTML(booking.email || "N/A")}</p>
 
-        <h3>
+    <p><b>Phone:</b> ${escapeHTML(booking.phone || booking.phoneNumber || "N/A")}</p>
 
-            ${
-                checked
+    <p><b>Event:</b> ${escapeHTML(getBookingEvent(booking) || "N/A")}</p>
 
-                ?
+    <p><b>Status:</b> ${checked ? "CHECKED-IN" : "NOT CHECKED-IN"}</p>
 
-                "⚠️ Ticket Already Checked-in"
+    ${
+        checked
+        ? `<p class="small">✅ This ticket has already been checked-in.</p>`
+        : `<button class="green" onclick="checkInVerified('${escapeHTML(booking.id)}')">✅ Confirm Check-in</button>`
+    }
 
-                :
-
-                "✅ Valid Ticket"
-
-            }
-
-        </h3>
-
-
-        <p>
-
-            <b>Ticket ID:</b>
-
-            ${escapeHTML(ticket)}
-
-        </p>
-
-
-        <p>
-
-            <b>Name:</b>
-
-            ${escapeHTML(
-                getBookingName(
-                    booking
-                )
-            )}
-
-        </p>
-
-
-        <p>
-
-            <b>Email:</b>
-
-            ${escapeHTML(
-                booking.email ||
-                "N/A"
-            )}
-
-        </p>
-
-
-        <p>
-
-            <b>Phone:</b>
-
-            ${escapeHTML(
-                booking.phone ||
-                booking.phoneNumber ||
-                "N/A"
-            )}
-
-        </p>
-
-
-        <p>
-
-            <b>Event:</b>
-
-            ${escapeHTML(
-                getBookingEvent(
-                    booking
-                ) ||
-                "N/A"
-            )}
-
-        </p>
-
-
-        <p>
-
-            <b>Status:</b>
-
-            ${
-                checked
-                ?
-                "CHECKED-IN"
-                :
-                "NOT CHECKED-IN"
-            }
-
-        </p>
-
-
-        ${
-            checked
-
-            ?
-
-            `
-            <p class="small">
-
-                ✅ This ticket has already been checked-in.
-
-            </p>
-            `
-
-            :
-
-            `
-            <button
-                class="green"
-                onclick="checkInVerified('${escapeHTML(booking.id)}')"
-            >
-
-                ✅ Confirm Check-in
-
-            </button>
-            `
-
-        }
-
-
-        <button
-            class="red"
-            onclick="deleteBooking('${escapeHTML(booking.id)}')"
-        >
-
-            🗑 Delete Booking
-
-        </button>
+    <button class="red" onclick="deleteBooking('${escapeHTML(booking.id)}')">
+    🗑 Delete Booking
+    </button>
 
     `;
-
 }
 
 
-/* =====================================================
+/* =========================================
    CHECK-IN VERIFIED
-===================================================== */
+========================================= */
 
-async function checkInVerified(
-    documentId
-){
+async function checkInVerified(documentId){
 
     if(!firebaseReady){
 
-        alert(
-            "Firebase is not configured."
-        );
+        alert("Firebase is not configured.");
 
         return;
-
     }
-
 
     try{
 
-        await db
-        .collection("bookings")
+        await db.collection("bookings")
         .doc(documentId)
         .update({
 
@@ -3094,300 +1247,157 @@ async function checkInVerified(
 
             status:"checked-in",
 
-            checkedInAt:
-                new Date().toISOString()
+            checkedInAt:new Date().toISOString()
 
         });
 
-
-        alert(
-            "✅ Ticket checked-in successfully."
-        );
-
+        alert("✅ Ticket checked-in successfully.");
 
         await loadBookings();
 
+        const booking=allBookings.find(function(b){
 
-        const booking =
-            allBookings.find(
-                function(b){
+            return b.id===documentId;
 
-                    return b.id ===
-                        documentId;
-
-                }
-            );
-
+        });
 
         if(booking){
 
-            showBookingVerification(
-                booking
-            );
+            showBookingVerification(booking);
 
         }
 
     }catch(error){
 
-        console.error(
-            error
-        );
+        console.error(error);
 
-
-        alert(
-
-            "❌ Check-in failed: " +
-            error.message
-
-        );
+        alert("❌ Check-in failed: "+error.message);
 
     }
-
 }
 
 
-/* =====================================================
+/* =========================================
    CSV EXPORT
-===================================================== */
+========================================= */
 
 function exportCSV(){
 
-    if(allBookings.length === 0){
+    if(allBookings.length===0){
 
-        alert(
-            "No bookings to export."
-        );
+        alert("No bookings to export.");
 
         return;
-
     }
 
-
-    const headers = [
+    const headers=[
 
         "Ticket ID",
-
         "Name",
-
         "Email",
-
         "Phone",
-
         "Event",
-
         "Quantity",
-
         "Date",
-
         "Status",
-
         "Booking ID"
 
     ];
 
+    const rows=allBookings.map(function(b){
 
-    const rows =
-        allBookings.map(
-            function(b){
+        const checked=isCheckedIn(b);
 
-                const checked =
-                    isCheckedIn(
-                        b
-                    );
+        return [
 
+            getTicketId(b),
 
-                return [
+            getBookingName(b),
 
-                    getTicketId(
-                        b
-                    ),
+            b.email || "",
 
-                    getBookingName(
-                        b
-                    ),
+            b.phone || b.phoneNumber || "",
 
-                    b.email ||
-                    "",
+            getBookingEvent(b),
 
-                    b.phone ||
-                    b.phoneNumber ||
-                    "",
+            b.quantity || b.tickets || b.numberOfTickets || "1",
 
-                    getBookingEvent(
-                        b
-                    ),
+            b.date || b.eventDate || b.bookingDate || "",
 
-                    b.quantity ||
-                    b.tickets ||
-                    b.numberOfTickets ||
-                    "1",
+            checked ? "Checked-in" : "Not Checked-in",
 
-                    b.date ||
-                    b.eventDate ||
-                    b.bookingDate ||
-                    "",
+            b.bookingId || b.id || ""
 
-                    checked
-                    ?
-                    "Checked-in"
-                    :
-                    "Not Checked-in",
+        ];
 
-                    b.bookingId ||
-                    b.id ||
-                    ""
+    });
 
-                ];
+    const csv=[headers,...rows].map(function(row){
 
-            }
-        );
+        return row.map(function(value){
 
+            return '"'+String(value ?? "").replace(/"/g,'""')+'"';
 
-    const csv = [
+        }).join(",");
 
-        headers,
+    }).join("\n");
 
-        ...rows
-
-    ]
-    .map(
-        function(row){
-
-            return row
-            .map(
-                function(value){
-
-                    return '"' +
-
-                        String(
-                            value ?? ""
-                        )
-                        .replace(
-                            /"/g,
-                            '""'
-                        ) +
-
-                        '"';
-
-                }
-            )
-            .join(",");
-
-        }
-    )
-    .join("\n");
-
-
-    const blob =
-        new Blob(
-            [csv],
-            {
-                type:
-                    "text/csv;charset=utf-8;"
-            }
-        );
-
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-
-    const a =
-        document.createElement(
-            "a"
-        );
-
-
-    a.href =
-        url;
-
-
-    a.download =
-        "event-bookings.csv";
-
-
-    document.body
-    .appendChild(
-        a
+    const blob=new Blob(
+        [csv],
+        {type:"text/csv;charset=utf-8;"}
     );
 
+    const url=URL.createObjectURL(blob);
+
+    const a=document.createElement("a");
+
+    a.href=url;
+
+    a.download="event-bookings.csv";
+
+    document.body.appendChild(a);
 
     a.click();
 
-
     a.remove();
 
-
-    URL.revokeObjectURL(
-        url
-    );
-
+    URL.revokeObjectURL(url);
 }
 
 
-/* =====================================================
+/* =========================================
    VERIFY MESSAGE
-===================================================== */
+========================================= */
 
-function showVerifyResult(
-    type,
-    message
-){
+function showVerifyResult(type,message){
 
-    const result =
-        document.getElementById(
-            "verifyResult"
-        );
+    const result=document.getElementById("verifyResult");
 
+    result.className="verify-result "+type;
 
-    result.className =
-        "verify-result " +
-        type;
-
-
-    result.innerHTML =
-        message;
-
+    result.innerHTML=message;
 }
 
 
-/* =====================================================
+/* =========================================
    ESCAPE HTML
-===================================================== */
+========================================= */
 
-function escapeHTML(
-    value
-){
+function escapeHTML(value){
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+    return String(value ?? "")
 
+    .replace(/&/g,"&amp;")
+
+    .replace(/</g,"&lt;")
+
+    .replace(/>/g,"&gt;")
+
+    .replace(/"/g,"&quot;")
+
+    .replace(/'/g,"&#039;");
 }
 
 </script>
-
 </body>
 </html>
