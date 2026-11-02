@@ -3,123 +3,259 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Organizer Dashboard | Event Ticketing</title>
+  <title>Organizer Dashboard</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f3f6f8;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 15px;
       color: #222;
     }
-    header {
-      background: #075e54;
-      color: white;
-      padding: 20px;
+
+    .container {
+      max-width: 850px;
+      margin: auto;
     }
-    header h2 { margin: 0 0 6px; }
-    main {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 15px;
-    }
+
     .card {
       background: white;
       padding: 18px;
-      border-radius: 12px;
       margin-bottom: 18px;
-      box-shadow: 0 2px 8px #00000010;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-    }
-    .stat {
-      background: #e8f4f1;
-      padding: 15px;
       border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     }
-    .stat strong {
-      display: block;
-      font-size: 25px;
+
+    h2, h3 {
       color: #075e54;
-      margin-top: 8px;
+      margin-top: 0;
     }
-    input, textarea, button {
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 13px;
+    }
+
+    input, select, textarea {
       width: 100%;
       padding: 12px;
-      margin: 7px 0;
-      border-radius: 7px;
+      margin-top: 6px;
       border: 1px solid #ccc;
+      border-radius: 6px;
       font-size: 15px;
     }
+
+    textarea {
+      min-height: 85px;
+      resize: vertical;
+    }
+
     button {
       background: #075e54;
       color: white;
       border: none;
+      padding: 12px 18px;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: bold;
+      margin-top: 15px;
+      font-size: 15px;
     }
+
     button:disabled {
-      background: #999;
+      opacity: 0.6;
       cursor: not-allowed;
     }
-    .logout { background: #b3261e; max-width: 130px; }
+
+    .logout {
+      background: #b42318;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: #e7f5f2;
+      padding: 15px 8px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 23px;
+      color: #075e54;
+      margin-top: 8px;
+    }
+
     .event {
       border: 1px solid #ddd;
       padding: 13px;
-      border-radius: 8px;
-      margin: 10px 0;
+      margin-top: 12px;
+      border-radius: 7px;
+      background: #fff;
     }
-    .muted { color: #666; font-size: 14px; }
-    #message { font-weight: bold; }
+
+    .hidden {
+      display: none;
+    }
+
+    #message {
+      font-weight: bold;
+      margin-top: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    @media(max-width: 500px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
+<div class="container">
 
-<header>
-  <h2>Organizer Dashboard</h2>
-  <div>Manage your events and registrations</div>
-</header>
+  <div class="card">
+    <h2>Organizer Dashboard</h2>
 
-<main>
-  <section class="card">
-    <h3>Organizer Information</h3>
-    <p id="organizerName">Loading...</p>
-    <p id="organizerEmail"></p>
-    <p id="accountStatus" class="muted"></p>
+    <p id="organizerName">Loading organizer name...</p>
+    <p id="organizerEmail">Loading email...</p>
+    <p id="accountStatus">Checking account status...</p>
+
     <button id="logoutButton" class="logout">Logout</button>
-  </section>
+  </div>
 
-  <section class="card">
+  <div class="card">
     <h3>Participant Capacity</h3>
+
     <div class="stats">
       <div class="stat">
         Purchased
         <strong id="purchasedCapacity">0</strong>
       </div>
+
       <div class="stat">
         Used
         <strong id="usedCapacity">0</strong>
       </div>
+
       <div class="stat">
         Remaining
         <strong id="remainingCapacity">0</strong>
       </div>
     </div>
-    <p class="muted">
-      Your participant capacity will increase after a verified capacity purchase.
-    </p>
-  </section>
 
-  <section class="card">
+    <p class="hint">
+      You must have purchased participant capacity before creating an event.
+    </p>
+  </div>
+
+  <div class="card">
     <h3>Create New Event</h3>
-    <p class="muted">Fill in the details of your event.</p>
 
     <form id="eventForm">
-      <input id="eventName" type="text" placeholder="Event Name" required>
 
-      <textarea id="eventDescription" placeholder="Event Description" required></textarea>
+      <label>Event Name</label>
+      <input type="text" id="eventName" required>
 
-      <input id="organ
+      <label>Event Type</label>
+      <select id="eventType" required>
+        <option value="">Select Event Type</option>
+        <option value="Islamic Lecture">Islamic Lecture</option>
+        <option value="Islamic Conference">Islamic Conference</option>
+        <option value="Qur'an Recitation">Qur'an Recitation</option>
+        <option value="Qur'an Memorization">Qur'an Memorization</option>
+        <option value="Naat Competition">Naat Competition</option>
+        <option value="Wedding">Wedding</option>
+        <option value="Birthday">Birthday</option>
+        <option value="Naming Ceremony">Naming Ceremony</option>
+        <option value="Graduation">Graduation</option>
+        <option value="Conference">Conference</option>
+        <option value="Seminar">Seminar</option>
+        <option value="Workshop">Workshop</option>
+        <option value="Training">Training</option>
+        <option value="Youth Program">Youth Program</option>
+        <option value="Sports">Sports</option>
+        <option value="Community Event">Community Event</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <div id="otherEventTypeBox" class="hidden">
+        <label>Enter Other Event Type</label>
+        <input
+          type="text"
+          id="customEventType"
+          placeholder="Write your event type">
+      </div>
+
+      <label>Event Description</label>
+      <textarea id="eventDescription" required></textarea>
+
+      <label>Organizer Name</label>
+      <input type="text" id="organizerDisplayName" required>
+
+      <label>Event Date</label>
+      <input type="date" id="eventDate" required>
+
+      <label>Start Time</label>
+      <input type="time" id="startTime" required>
+
+      <label>End Time</label>
+      <input type="time" id="endTime" required>
+
+      <label>Venue</label>
+      <input type="text" id="eventVenue" required>
+
+      <label>Full Address</label>
+      <textarea id="eventAddress" required></textarea>
+
+      <label>Contact Number</label>
+      <input type="tel" id="eventContact" required>
+
+      <label>Contact Email</label>
+      <input type="email" id="eventEmail" required>
+
+      <label>Event Image URL</label>
+      <input type="url" id="eventImage" placeholder="https://example.com/image.jpg">
+
+      <label>Participant Capacity</label>
+      <input type="number" id="eventCapacity" min="1" required>
+
+      <p class="hint">
+        Event capacity cannot exceed your remaining purchased capacity.
+      </p>
+
+      <button type="submit" id="createEventButton">
+        Create Event
+      </button>
+
+      <p id="message"></p>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>My Events</h3>
+    <div id="eventsList">Loading events...</div>
+  </div>
+
+</div>
+
+<script type="module" src="./organizer-dashboard.js"></script>
+</body>
+</html>
